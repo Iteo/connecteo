@@ -21,6 +21,9 @@ jobs:
 
       - name: Analyze the project
         run: flutter analyze
+
+      - name: Check format
+        run: flutter format --fix --set-exit-if-changed .
         
       - name: Run the tests
         run: flutter test

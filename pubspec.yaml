@@ -7,12 +7,12 @@ environment:
   flutter: ">=3.0.0"
 
 dependencies:
+  connectivity_plus: ^3.0.2
   flutter:
     sdk: flutter
-  connectivity_plus: ^3.0.2
   rxdart: ^0.27.7
-  
+
 dev_dependencies:
   lints: ^2.0.0
+  mocktail: ^0.3.0
   test: ^1.16.0
-

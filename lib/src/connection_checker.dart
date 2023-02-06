@@ -5,6 +5,7 @@ import 'package:connecteo/src/connection_type.dart';
 import 'package:connecteo/src/connection_type_mapper.dart';
 import 'package:connecteo/src/host_reachability_checker.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
 const _defaultRequestInterval = Duration(seconds: 3);
@@ -19,18 +20,19 @@ class ConnectionChecker {
     String? baseUrlLookupAddress,
     Duration? requestInterval,
     int? failureAttempts,
+    Connectivity? connectivity,
+    HostReachabilityChecker? hostReachabilityChecker,
+    Mapper<ConnectivityResult, ConnectionType>? connectionTypeMapper,
   })  : _checkHostReachability = checkHostReachability,
         _checkAddresses = checkAddresses,
         _checkOverDnsTimeout = checkOverDnsTimeout,
         _baseUrlLookupAddress = baseUrlLookupAddress,
         _failureAttempts = failureAttempts ?? _defaultFailureAttempts,
         _requestInterval = requestInterval ?? _defaultRequestInterval,
-        _connectivity = Connectivity(),
-        _connectionTypeMapper = ConnectionTypeMapper(),
-        _hostReachabilityChecker = HostReachabilityChecker(),
-        _initialConnectedValue = Completer() {
-    _setupInitialConnection();
-  }
+        _connectivity = connectivity ?? Connectivity(),
+        _connectionTypeMapper = connectionTypeMapper ?? ConnectionTypeMapper(),
+        _hostReachabilityChecker =
+            hostReachabilityChecker ?? DefaultHostReachabilityChecker();
 
   factory ConnectionChecker({
     bool checkHostReachability = true,
@@ -45,13 +47,40 @@ class ConnectionChecker {
       checkOverDnsTimeout: checkOverDnsTimeout,
       baseUrlLookupAddress: baseUrlLookupAddress,
       checkHostReachability: checkHostReachability,
+      failureAttempts: failureAttempts,
+      requestInterval: requestInterval,
+    );
+  }
+
+  @visibleForTesting
+  factory ConnectionChecker.test({
+    required Connectivity connectivity,
+    required HostReachabilityChecker hostReachabilityChecker,
+    required Mapper<ConnectivityResult, ConnectionType> connectionTypeMapper,
+    bool checkHostReachability = true,
+    List<InternetAddress>? checkAddresses,
+    Duration? checkOverDnsTimeout,
+    String? baseUrlLookupAddress,
+    Duration? requestInterval,
+    int? failureAttempts,
+  }) {
+    return ConnectionChecker._(
+      checkHostReachability: checkHostReachability,
+      hostReachabilityChecker: hostReachabilityChecker,
+      connectionTypeMapper: connectionTypeMapper,
+      connectivity: connectivity,
+      checkAddresses: checkAddresses,
+      checkOverDnsTimeout: checkOverDnsTimeout,
+      baseUrlLookupAddress: baseUrlLookupAddress,
+      failureAttempts: failureAttempts,
+      requestInterval: requestInterval,
     );
   }
 
   static ConnectionChecker? _singleton;
 
   final Connectivity _connectivity;
-  final ConnectionTypeMapper _connectionTypeMapper;
+  final Mapper<ConnectivityResult, ConnectionType> _connectionTypeMapper;
 
   final List<InternetAddress>? _checkAddresses;
   final Duration? _checkOverDnsTimeout;
@@ -61,16 +90,6 @@ class ConnectionChecker {
   final int _failureAttempts;
 
   final HostReachabilityChecker _hostReachabilityChecker;
-
-  final Completer<bool> _initialConnectedValue;
-
-  Future<bool> get isConnected async {
-    if (!_initialConnectedValue.isCompleted) {
-      return _initialConnectedValue.future;
-    } else {
-      return _isConnected;
-    }
-  }
 
   Stream<bool> get connectionStream => CombineLatestStream([
         _connectivity.onConnectivityChanged.map(_connectionTypeMapper.call),
@@ -82,17 +101,30 @@ class ConnectionChecker {
           .switchMap(_isBaseUrlReachableStream)
           .distinct();
 
+  Future<bool> get isConnected async {
+    final result = await _connectivity.checkConnectivity();
+    final isConnectionTypeOnline =
+        _connectionTypeMapper.call(result).onlineType;
+
+    final reachability = await Future.wait([_hostReachable, _baseUrlReachable]);
+    final isHostReachable = [isConnectionTypeOnline, ...reachability]
+        .every((reachable) => reachable == true);
+
+    return isHostReachable;
+  }
+
   Future<ConnectionType> get connectionType async {
     final connectivityResult = await _connectivity.checkConnectivity();
     return _connectionTypeMapper.call(connectivityResult);
   }
 
   Future<void> untilConnects() async {
-    await connectionStream.where((event) => event == true).first;
+    await connectionStream.where((event) => event).first;
   }
 
   Stream<bool> _isConnectionTypeReachableStream(
-      ConnectionType connectionType) async* {
+    ConnectionType connectionType,
+  ) async* {
     final isHostReachable = await _hostReachable;
     if (!isHostReachable) {
       yield false;
@@ -128,14 +160,6 @@ class ConnectionChecker {
     }
   }
 
-  Future<bool> get _isConnected async {
-    final reachability = await Future.wait([_hostReachable, _baseUrlReachable]);
-    final isHostReachable =
-        reachability.every((reachable) => reachable == true);
-
-    return isHostReachable;
-  }
-
   Future<bool> get _hostReachable async {
     final hostReachable = _checkHostReachability
         ? await _hostReachabilityChecker.canReachAnyHost(
@@ -155,10 +179,5 @@ class ConnectionChecker {
     } else {
       return true;
     }
-  }
-
-  Future<void> _setupInitialConnection() async {
-    final isConnectedResult = await _isConnected;
-    _initialConnectedValue.complete(isConnectedResult);
   }
 }

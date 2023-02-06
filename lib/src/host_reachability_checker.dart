@@ -19,7 +19,17 @@ final _defaultAddresses = List<InternetAddress>.unmodifiable([
   ),
 ]);
 
-class HostReachabilityChecker {
+abstract class HostReachabilityChecker {
+  Future<bool> hostLookup({required String baseUrl});
+
+  Future<bool> canReachAnyHost({
+    List<InternetAddress>? internetAddresses,
+    Duration? timeout,
+  });
+}
+
+class DefaultHostReachabilityChecker implements HostReachabilityChecker {
+  @override
   Future<bool> hostLookup({required String baseUrl}) async {
     try {
       final host = Uri.parse(baseUrl).host;
@@ -31,6 +41,7 @@ class HostReachabilityChecker {
     }
   }
 
+  @override
   Future<bool> canReachAnyHost({
     List<InternetAddress>? internetAddresses,
     Duration? timeout,
@@ -52,16 +63,16 @@ class HostReachabilityChecker {
     required String address,
     required Duration timeout,
   }) async {
-    return await Socket.connect(
-      address,
-      _dnsPort,
-      timeout: timeout,
-    ).then(
-      (socket) {
-        socket.destroy();
-        return true;
-      },
-      onError: (_) => false,
-    );
+    try {
+      final socket = await Socket.connect(
+        address,
+        _dnsPort,
+        timeout: timeout,
+      );
+      socket.destroy();
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 }

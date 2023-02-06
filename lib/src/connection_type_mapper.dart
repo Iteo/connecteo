@@ -1,9 +1,15 @@
 import 'package:connecteo/src/connection_type.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
-class ConnectionTypeMapper {
-  ConnectionType call(ConnectivityResult connectivityResult) {
-    switch (connectivityResult) {
+abstract class Mapper<I, O> {
+  O call(I input);
+}
+
+class ConnectionTypeMapper
+    implements Mapper<ConnectivityResult, ConnectionType> {
+  @override
+  ConnectionType call(ConnectivityResult input) {
+    switch (input) {
       case ConnectivityResult.bluetooth:
         return ConnectionType.bluetooth;
       case ConnectivityResult.ethernet:
