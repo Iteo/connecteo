@@ -19,3 +19,6 @@ pubspec.lock
 .vscode/
 .flutter-plugins
 .flutter-plugins-dependencies
+
+# Directory created by dartdoc
+doc/api/

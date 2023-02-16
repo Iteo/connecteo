@@ -1,3 +1,5 @@
+/// A representation of data connection type with simple `onlineType`
+/// information which help us to asses how we should treat the connection type.
 enum ConnectionType {
   bluetooth(true),
   wifi(true),
@@ -7,7 +9,8 @@ enum ConnectionType {
   none(false),
   unknown(false);
 
-  final bool onlineType;
-
+  // ignore: avoid_positional_boolean_parameters
   const ConnectionType(this.onlineType);
+
+  final bool onlineType;
 }
