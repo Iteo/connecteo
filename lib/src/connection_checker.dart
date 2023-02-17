@@ -140,8 +140,8 @@ class ConnectionChecker {
   /// The detected event has to go through several checks which help assess
   /// if online connection is actually online:
   /// - A new (or previous) connection type has to be online;
-  /// - A socket has to be opened and successfully checked over DNS port against
-  /// at least one IP address (from `checkAddresses`);
+  /// - A socket connection has to be opened and successfully checked over DNS
+  /// port against at least one IP address (from `checkAddresses`);
   /// - A response from optional `baseUrlLookupAddress` has to be successful if
   /// address was provided.
   Stream<bool> get connectionStream => CombineLatestStream(
