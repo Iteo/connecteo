@@ -1,3 +1,5 @@
+// ignore_for_file: unawaited_futures
+
 import 'dart:async';
 
 import 'package:connecteo/connecteo.dart';
@@ -57,9 +59,11 @@ void main() {
         () async {
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(false));
-      when(() => hostReachabilityChecker.hostLookup(
-              baseUrl: any(named: 'baseUrl')))
-          .thenAnswer((_) => Future.value(true));
+      when(
+        () => hostReachabilityChecker.hostLookup(
+          baseUrl: any(named: 'baseUrl'),
+        ),
+      ).thenAnswer((_) => Future.value(true));
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value(ConnectivityResult.wifi));
       when(() => connectionTypeMapper.call(any()))
@@ -78,9 +82,11 @@ void main() {
         () async {
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(true));
-      when(() => hostReachabilityChecker.hostLookup(
-              baseUrl: any(named: 'baseUrl')))
-          .thenAnswer((_) => Future.value(true));
+      when(
+        () => hostReachabilityChecker.hostLookup(
+          baseUrl: any(named: 'baseUrl'),
+        ),
+      ).thenAnswer((_) => Future.value(true));
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value(ConnectivityResult.wifi));
       when(() => connectionTypeMapper.call(any()))
@@ -99,9 +105,11 @@ void main() {
         () async {
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(true));
-      when(() => hostReachabilityChecker.hostLookup(
-              baseUrl: any(named: 'baseUrl')))
-          .thenAnswer((_) => Future.value(true));
+      when(
+        () => hostReachabilityChecker.hostLookup(
+          baseUrl: any(named: 'baseUrl'),
+        ),
+      ).thenAnswer((_) => Future.value(true));
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value(ConnectivityResult.none));
       when(() => connectionTypeMapper.call(any()))
@@ -136,14 +144,16 @@ void main() {
 
       expect(result, true);
       verify(() => hostReachabilityChecker.canReachAnyHost()).called(1);
-      verifyNever(() =>
-          hostReachabilityChecker.hostLookup(baseUrl: any(named: 'baseUrl')));
+      verifyNever(
+        () =>
+            hostReachabilityChecker.hostLookup(baseUrl: any(named: 'baseUrl')),
+      );
     });
   });
 
   group('connectionType', () {
     test('returns current connectionType', () async {
-      final expected = ConnectionType.wifi;
+      const expected = ConnectionType.wifi;
 
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value(ConnectivityResult.wifi));
@@ -164,9 +174,11 @@ void main() {
       final controller = StreamController<ConnectivityResult>();
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(true));
-      when(() => hostReachabilityChecker.hostLookup(
-              baseUrl: any(named: 'baseUrl')))
-          .thenAnswer((_) => Future.value(true));
+      when(
+        () => hostReachabilityChecker.hostLookup(
+          baseUrl: any(named: 'baseUrl'),
+        ),
+      ).thenAnswer((_) => Future.value(true));
       when(() => connectivity.onConnectivityChanged)
           .thenAnswer((_) => controller.stream);
       when(() => connectionTypeMapper.call(ConnectivityResult.wifi))
@@ -178,7 +190,7 @@ void main() {
         completer.complete(true);
       });
       controller.add(ConnectivityResult.none);
-      await Future.delayed(requestInterval);
+      await Future<void>.delayed(requestInterval);
       controller.add(ConnectivityResult.wifi);
 
       expect(completer.future, completion(true));
@@ -194,9 +206,11 @@ void main() {
       final controller = StreamController<ConnectivityResult>();
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(true));
-      when(() => hostReachabilityChecker.hostLookup(
-              baseUrl: any(named: 'baseUrl')))
-          .thenAnswer((_) => Future.value(true));
+      when(
+        () => hostReachabilityChecker.hostLookup(
+          baseUrl: any(named: 'baseUrl'),
+        ),
+      ).thenAnswer((_) => Future.value(true));
       when(() => connectivity.onConnectivityChanged)
           .thenAnswer((_) => controller.stream);
       when(() => connectionTypeMapper.call(any()))
@@ -223,9 +237,11 @@ void main() {
       final controller = StreamController<ConnectivityResult>();
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(true));
-      when(() => hostReachabilityChecker.hostLookup(
-              baseUrl: any(named: 'baseUrl')))
-          .thenAnswer((_) => Future.value(true));
+      when(
+        () => hostReachabilityChecker.hostLookup(
+          baseUrl: any(named: 'baseUrl'),
+        ),
+      ).thenAnswer((_) => Future.value(true));
       when(() => connectivity.onConnectivityChanged)
           .thenAnswer((_) => controller.stream);
       when(() => connectionTypeMapper.call(ConnectivityResult.wifi))
@@ -243,7 +259,7 @@ void main() {
             .called(1);
       });
       controller.add(ConnectivityResult.wifi);
-      await Future.delayed(requestInterval);
+      await Future<void>.delayed(requestInterval);
       controller.add(ConnectivityResult.none);
 
       controller.close();
@@ -255,9 +271,11 @@ void main() {
       final controller = StreamController<ConnectivityResult>.broadcast();
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(false));
-      when(() => hostReachabilityChecker.hostLookup(
-              baseUrl: any(named: 'baseUrl')))
-          .thenAnswer((_) => Future.value(false));
+      when(
+        () => hostReachabilityChecker.hostLookup(
+          baseUrl: any(named: 'baseUrl'),
+        ),
+      ).thenAnswer((_) => Future.value(false));
       when(() => connectivity.onConnectivityChanged)
           .thenAnswer((_) => controller.stream);
       when(() => connectionTypeMapper.call(ConnectivityResult.wifi))
@@ -271,7 +289,8 @@ void main() {
           verify(() => hostReachabilityChecker.canReachAnyHost())
               .called(failureAttempts);
           verifyNever(
-              () => hostReachabilityChecker.hostLookup(baseUrl: baseUrl));
+            () => hostReachabilityChecker.hostLookup(baseUrl: baseUrl),
+          );
         },
       );
       controller.add(ConnectivityResult.wifi);

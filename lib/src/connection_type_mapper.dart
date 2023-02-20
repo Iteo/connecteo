@@ -22,7 +22,7 @@ class ConnectionTypeMapper
         return ConnectionType.wifi;
       case ConnectivityResult.none:
         return ConnectionType.none;
-      default:
+      case ConnectivityResult.other:
         return ConnectionType.unknown;
     }
   }

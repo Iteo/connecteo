@@ -14,7 +14,7 @@ final localhostAddress = InternetAddress(
   type: InternetAddressType.IPv4,
 );
 
-final googleUrl = 'https://google.com/';
+const googleUrl = 'https://google.com/';
 
 void main() {
   late HostReachabilityChecker hostReachabilityChecker;
@@ -24,7 +24,7 @@ void main() {
   });
 
   group('hostLookup', () {
-    test("should return true if host of the provided address can be lookup",
+    test('should return true if host of the provided address can be lookup',
         () async {
       final result =
           await hostReachabilityChecker.hostLookup(baseUrl: googleUrl);
@@ -33,7 +33,7 @@ void main() {
     });
 
     test(
-        "should return false if host of the provided address can not be lookup",
+        'should return false if host of the provided address can not be lookup',
         () async {
       const chars =
           'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
@@ -53,7 +53,8 @@ void main() {
       final addresses = [googleInternetAddress, localhostAddress];
 
       final result = await hostReachabilityChecker.canReachAnyHost(
-          internetAddresses: addresses);
+        internetAddresses: addresses,
+      );
 
       expect(result, true);
     });
