@@ -42,17 +42,6 @@ void main() {
     );
   });
 
-  group('init', () {
-    test('should return always the same ConnectionChecker instance (singleton)',
-        () {
-      final instance1 = ConnectionChecker();
-      final instance2 = ConnectionChecker();
-
-      expect(instance1 == instance2, true);
-      expect(instance1.hashCode == instance2.hashCode, true);
-    });
-  });
-
   group('isConnected', () {
     test(
         'returns false if hosts are not reachable although connection type is online',

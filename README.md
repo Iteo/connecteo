@@ -57,7 +57,7 @@ The statement about reliable internet connection is true when all these conditio
 
 ### ConnectionChecker init
 
-By instantiating the connecteo's `ConnectionChecker` class, you will always spawn a singleton. There are a couple of parameters (with its default values) that the constructor takes - you can modify them to suit your needs:
+There are a couple of parameters (with its default values) that the `ConnectionChecker`'s constructor takes - you can modify them to suit your needs:
 
 - checkHostReachability - let's you specify if you want to open a socket connection to the list of addresses (`checkAddresses`). Its default value is set to `true`.
 - checkAddresses - a list of custom `InternetAddress` which will be used to open the socket connections. The default list contains from three addresses: *CloudFlare (1.1.1.1)*, *Google (8.8.4.4)* and *OpenDNS (208.67.222.222)*.
