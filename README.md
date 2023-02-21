@@ -8,6 +8,7 @@ A plugin that wraps [connectivity_plus](https://pub.dev/packages/connectivity_pl
 - [Setup](#setup)
 - [How it works](#how-it-works)
 - [Usage](#usage)
+    - [ConnectionChecker init](#connectionchecker-init)
     - [connectionStream](#get-connectionstream)
     - [isConnected](#get-isconnected)
     - [connectionType](#get-connectiontype)
@@ -54,7 +55,38 @@ The statement about reliable internet connection is true when all these conditio
 
 ## Usage
 
-By instantiating the connecteo's `ConnectionChecker` class, you will always spawn a singleton. There are a couple of parameters (with its default values) that the constructor takes - you can modify them to suit your needs. For params description, check out our [ConnectionChecker API doc](https://pub.dev/documentation/connecteo/latest/ConnectionChecker/ConnectionChecker.html).
+### ConnectionChecker init
+
+By instantiating the connecteo's `ConnectionChecker` class, you will always spawn a singleton. There are a couple of parameters (with its default values) that the constructor takes - you can modify them to suit your needs:
+
+- checkHostReachability - let's you specify if you want to open a socket connection to the list of addresses (`checkAddresses`). Its default value is set to `true`.
+- checkAddresses - a list of custom `InternetAddress` which will be used to open the socket connections. The default list contains from three addresses: *CloudFlare (1.1.1.1)*, *Google (8.8.4.4)* and *OpenDNS (208.67.222.222)*.
+- checkOverDnsTimeout - let's you specify the `Duration` which is being used for the timeout for each `InternetAddress` and its socket's opening. The default value is 3 seconds.
+- baseUrlLookupAddress - a `String` URL which indicates the address you want to lookup during connection checks. Once you provide your URL, the `connectionStream` and `isConnected` will return true values only after successful host lookup. Its default value is `null`.
+- requestInterval - it is a `Duration` which is being used for the interval how often the internet connection status should be refreshed. By default its value is set to 3 seconds.
+- failureAttempts - the number of maximum trials between changing the online to offline state.When the lost connection won't go back after number of `failureAttempts`, the `connectionStream` and `isConnected` will return false values until connection get back. The default value is set to 4 attempts.
+
+Example:
+
+```dart
+final connecteo = ConnectionChecker(
+    checkHostReachability: true,
+    checkAddresses: [
+        InternetAddress(
+            '1.0.0.1', // CloudFlare
+            type: InternetAddressType.IPv4,
+        ),
+        InternetAddress(
+            '208.67.220.220', // OpenDNS
+            type: InternetAddressType.IPv4,
+        ),
+    ],
+    checkOverDnsTimeout: Duration(seconds: 5),
+    baseUrlLookupAddress: 'https://pub.dev/',
+    failureAttempts: 7,
+    requestInterval: Duration(seconds: 5),
+);
+```
 
 ### get connectionStream
 
