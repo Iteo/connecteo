@@ -152,5 +152,5 @@ connecteo.untilConnects().then((_) {
 
 ---
 
-For more detailed information about the package possibilities, visit the [API documentation](https://pub.dev/documentation/connecteo/latest/index.html).
+For more detailed information about the package possibilities, visit the [API documentation](https://pub.dev/documentation/connecteo/latest/connecteo/connecteo-library.html).
 
