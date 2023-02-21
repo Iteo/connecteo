@@ -1,0 +1,29 @@
+name: Build
+
+on:
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install environment
+        uses: subosito/flutter-action@v2.8.0
+        with:
+          flutter-version: 3.3.10
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Analyze the project
+        run: flutter analyze
+
+      - name: Check format
+        run: flutter format --fix --set-exit-if-changed .
+        
+      - name: Run the tests
+        run: flutter test
