@@ -15,10 +15,10 @@ const _defaultFailureAttempts = 4;
 /// The class responsbile for checking and monitoring the actual internet
 /// connection by wrapping the [Connectivity] class and adding some extra checks.
 class ConnectionChecker {
-  /// Contructs a singleton of [ConnectionChecker] class.
+  /// Contructs an instance of [ConnectionChecker] class.
   ///
   /// The class comes with the list of optional parameters which you can
-  /// provide during singleton's init:
+  /// provide during init:
   ///
   /// - `checkHostReachabiltiy` - [bool] value which determines if
   /// [ConnectionChecker] should open a socket to a list of addresses.
@@ -61,7 +61,7 @@ class ConnectionChecker {
     Duration? requestInterval,
     int? failureAttempts,
   }) {
-    return _singleton ??= ConnectionChecker._(
+    return ConnectionChecker._(
       checkAddresses: checkAddresses,
       checkOverDnsTimeout: checkOverDnsTimeout,
       baseUrlLookupAddress: baseUrlLookupAddress,
@@ -118,8 +118,6 @@ class ConnectionChecker {
       requestInterval: requestInterval,
     );
   }
-
-  static ConnectionChecker? _singleton;
 
   final Connectivity _connectivity;
   final Mapper<ConnectivityResult, ConnectionType> _connectionTypeMapper;
