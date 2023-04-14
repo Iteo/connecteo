@@ -20,10 +20,10 @@ class ConnectionTypeMapper
         return ConnectionType.vpn;
       case ConnectivityResult.wifi:
         return ConnectionType.wifi;
+      case ConnectivityResult.other:
+        return ConnectionType.other;
       case ConnectivityResult.none:
         return ConnectionType.none;
-      case ConnectivityResult.other:
-        return ConnectionType.unknown;
     }
   }
 }
