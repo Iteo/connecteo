@@ -6,8 +6,8 @@ enum ConnectionType {
   ethernet(true),
   mobile(true),
   vpn(true),
-  none(false),
-  unknown(false);
+  other(true),
+  none(false);
 
   // ignore: avoid_positional_boolean_parameters
   const ConnectionType(this.onlineType);
