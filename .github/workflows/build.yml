@@ -14,7 +14,7 @@ jobs:
       - name: Install environment
         uses: subosito/flutter-action@v2.8.0
         with:
-          flutter-version: 3.3.10
+          flutter-version: 3.7.0
 
       - name: Get dependencies
         run: flutter pub get
@@ -23,7 +23,7 @@ jobs:
         run: flutter analyze
 
       - name: Check format
-        run: flutter format --fix --set-exit-if-changed .
+        run: dart format --fix --set-exit-if-changed .
         
       - name: Run the tests
         run: flutter test
