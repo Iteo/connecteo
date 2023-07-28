@@ -144,7 +144,13 @@ class ConnectionChecker {
   /// address was provided.
   Stream<bool> get connectionStream => CombineLatestStream(
         [
-          _connectivity.onConnectivityChanged.map(_connectionTypeMapper.call),
+          ConcatStream([
+            _connectivity
+                .checkConnectivity()
+                .asStream()
+                .map(_connectionTypeMapper.call),
+            _connectivity.onConnectivityChanged.map(_connectionTypeMapper.call),
+          ]),
           Stream<void>.periodic(_requestInterval),
         ],
         // ignore: cast_nullable_to_non_nullable
