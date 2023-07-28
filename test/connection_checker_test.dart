@@ -174,6 +174,8 @@ void main() {
           .thenAnswer((_) => ConnectionType.wifi);
       when(() => connectionTypeMapper.call(ConnectivityResult.none))
           .thenAnswer((_) => ConnectionType.none);
+      when(() => connectivity.checkConnectivity())
+          .thenAnswer((_) => Future.value(ConnectivityResult.wifi));
 
       connectionChecker.untilConnects().whenComplete(() {
         completer.complete(true);
@@ -204,6 +206,8 @@ void main() {
           .thenAnswer((_) => controller.stream);
       when(() => connectionTypeMapper.call(any()))
           .thenAnswer((_) => ConnectionType.wifi);
+      when(() => connectivity.checkConnectivity())
+          .thenAnswer((_) => Future.value(ConnectivityResult.wifi));
 
       expectLater(
         connectionChecker.connectionStream,
@@ -237,6 +241,8 @@ void main() {
           .thenAnswer((_) => ConnectionType.wifi);
       when(() => connectionTypeMapper.call(ConnectivityResult.none))
           .thenAnswer((_) => ConnectionType.none);
+      when(() => connectivity.checkConnectivity())
+          .thenAnswer((_) => Future.value(ConnectivityResult.wifi));
 
       expectLater(
         connectionChecker.connectionStream,
@@ -269,6 +275,8 @@ void main() {
           .thenAnswer((_) => controller.stream);
       when(() => connectionTypeMapper.call(ConnectivityResult.wifi))
           .thenAnswer((_) => ConnectionType.wifi);
+      when(() => connectivity.checkConnectivity())
+          .thenAnswer((_) => Future.value(ConnectivityResult.wifi));
 
       expectLater(
         connectionChecker.connectionStream,
