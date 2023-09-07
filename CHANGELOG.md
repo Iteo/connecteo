@@ -1,8 +1,9 @@
 ## 2.0.0
- 
+
+- Breaking changes: Now the package is using `ConnectionEntry` instead of `InternetAddress` to determine the connection params. This is because `InternetAddress` is not supported on Web.
 - Add support for Web platform
 - Add new class `ConnectionEntry` which is used to determine the connection params (address or api url)
-- Breaking changes: Now the package is using `ConnectionEntry` instead of `InternetAddress` to determine the connection params. This is because `InternetAddress` is not supported on Web.
+- Update Dart SDK constraints.
 
 ## 1.1.1
 
