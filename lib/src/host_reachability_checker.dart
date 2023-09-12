@@ -25,17 +25,17 @@ final _defaultAddresses = List<ConnectionEntry>.unmodifiable([
 
 final _defaultUrls = List<ConnectionEntry>.unmodifiable([
   ConnectionEntry(
-    'https://1.1.1.1',
+    'https://one.one.one.one',
     ConnectionEntryType.apiUrl,
   ),
-  // ConnectionEntry(
-  //   'https://jsonplaceholder.typicode.com/posts/1',
-  //   ConnectionEntryType.apiUrl,
-  // ),
-  // ConnectionEntry(
-  //   'http://worldtimeapi.org/api/timezone',
-  //   ConnectionEntryType.apiUrl,
-  // ),
+  ConnectionEntry(
+    'https://jsonplaceholder.typicode.com/posts/1',
+    ConnectionEntryType.apiUrl,
+  ),
+  ConnectionEntry(
+    'http://worldtimeapi.org/api/timezone',
+    ConnectionEntryType.apiUrl,
+  ),
 ]);
 
 abstract class HostReachabilityChecker {
