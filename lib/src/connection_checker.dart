@@ -28,12 +28,18 @@ class ConnectionChecker {
   /// to `true`.
   ///
   /// - `checkAddresses` - a list of custom [ConnectionEntry] which will be
-  /// used to open the socket. The default list contains from three addresses:
+  /// used to open the socket. This list should be used only on native platforms.
+  /// The default list contains from three addresses:
   /// to *CloudFlare (1.1.1.1)*, to *Google (8.8.4.4)* and
   /// to *OpenDNS (208.67.222.222)*
   ///
-  /// - `checkApiUrls` - a list of custom [ConnectionEntry] URLs which will be used
-  /// to call header on web.
+  ///
+  /// - `checkApiUrls` - a list of custom [ConnectionEntry] URLs which will be
+  /// used to call header or get on web. This list should be used only on Web platform.
+  /// The default list contains from three urls:
+  /// 'https://one.one.one.one',
+  /// 'https://jsonplaceholder.typicode.com/posts/1,
+  /// 'http://worldtimeapi.org/api/timezone'
   ///
   /// - `checkOverDnsTimeout` - a [Duration] which is being used for the timeout
   ///  for each [ConnectionEntry] and its socket's opening. The default value
@@ -42,10 +48,11 @@ class ConnectionChecker {
   /// - `baseUrlLookupAddress` - a [String] URL which indicates the address
   /// you want to lookup during connection checks. It may be helpful when you
   /// coming from offline to online state, got the reachability from
-  /// `checkAddresses` but calls to your server side end up with the
-  /// [SocketException] for few seconds. Once you provide your URL,
-  /// the [connectionStream] and [isConnected] will return true values only
-  /// after successful host lookup. Its default value is `null`.
+  /// `checkAddresses` or `checkApiUrls` depends on platform, but calls to you
+  /// server side end up with the [SocketException] for few seconds.
+  /// Once you provide your URL, the [connectionStream] and [isConnected]
+  /// will return true values only after successful host lookup.
+  /// Its default value is `null`.
   ///
   /// - `reguestInterval` - a [Duration] which is being used for the interval
   /// how often the internet connection status should be refreshed. By default
@@ -152,12 +159,18 @@ class ConnectionChecker {
   /// if online connection is actually online:
   /// - A new (or previous) connection type has to be online;
   /// - A socket connection has to be opened and successfully checked over DNS
-  /// port against at least one IP address (from `checkAddresses`);
+  /// port against at least one IP address (from `checkAddresses` or `checkApiUrls`);
   /// - A response from optional `baseUrlLookupAddress` has to be successful if
   /// address was provided.
   Stream<bool> get connectionStream => CombineLatestStream(
         [
-          _connectivity.onConnectivityChanged.map(_connectionTypeMapper.call),
+          ConcatStream([
+            _connectivity
+                .checkConnectivity()
+                .asStream()
+                .map(_connectionTypeMapper.call),
+            _connectivity.onConnectivityChanged.map(_connectionTypeMapper.call),
+          ]),
           Stream<void>.periodic(_requestInterval),
         ],
         // ignore: cast_nullable_to_non_nullable
