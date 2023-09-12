@@ -1,3 +1,11 @@
+## 2.0.0
+
+- Add support for Web platform
+- Breaking changes: Now the package is using `ConnectionEntry` instead of `InternetAddress` to determine the connection params. This is because `InternetAddress` is not supported on Web.
+- Add new class `ConnectionEntry` which is used to determine the connection params (address or api url)
+- Update Dart SDK constraints to `>=2.19.0 <4.0.0`
+- Update Flutter version to `>=3.10.0`
+
 ## 1.1.1
 
 - Fix the problem where `connectionStream` wasn't emitting the initial event when being offline from the startup. Problem was faced on the Android platform.
