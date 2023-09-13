@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:connecteo/src/connection_entry.dart';
 import 'package:connecteo/src/connection_type.dart';
 import 'package:connecteo/src/connection_type_mapper.dart';
 import 'package:connecteo/src/host_reachability_checker.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 
 const _defaultRequestInterval = Duration(seconds: 3);
@@ -26,22 +27,32 @@ class ConnectionChecker {
   /// communication, no matter of internet access. Its default value is set
   /// to `true`.
   ///
-  /// - `checkAddresses` - a list of custom [InternetAddress] which will be
-  /// used to open the socket. The default list contains from three addresses:
+  /// - `checkAddresses` - a list of custom [ConnectionEntry] which will be
+  /// used to open the socket. This list should be used only on native platforms.
+  /// The default list contains from three addresses:
   /// to *CloudFlare (1.1.1.1)*, to *Google (8.8.4.4)* and
   /// to *OpenDNS (208.67.222.222)*
   ///
+  ///
+  /// - `checkApiUrls` - a list of custom [ConnectionEntry] URLs which will be
+  /// used to call header or get on web. This list should be used only on Web platform.
+  /// The default list contains from three urls:
+  /// 'https://one.one.one.one',
+  /// 'https://jsonplaceholder.typicode.com/posts/1,
+  /// 'http://worldtimeapi.org/api/timezone'
+  ///
   /// - `checkOverDnsTimeout` - a [Duration] which is being used for the timeout
-  ///  for each [InternetAddress] and its socket's opening. The default value
+  ///  for each [ConnectionEntry] and its socket's opening. The default value
   /// here are 3 seconds.
   ///
   /// - `baseUrlLookupAddress` - a [String] URL which indicates the address
   /// you want to lookup during connection checks. It may be helpful when you
   /// coming from offline to online state, got the reachability from
-  /// `checkAddresses` but calls to your server side end up with the
-  /// [SocketException] for few seconds. Once you provide your URL,
-  /// the [connectionStream] and [isConnected] will return true values only
-  /// after successful host lookup. Its default value is `null`.
+  /// `checkAddresses` or `checkApiUrls` depends on platform, but calls to you
+  /// server side end up with the [SocketException] for few seconds.
+  /// Once you provide your URL, the [connectionStream] and [isConnected]
+  /// will return true values only after successful host lookup.
+  /// Its default value is `null`.
   ///
   /// - `reguestInterval` - a [Duration] which is being used for the interval
   /// how often the internet connection status should be refreshed. By default
@@ -55,7 +66,8 @@ class ConnectionChecker {
   /// connection get back. The default value is set to 4 attempts.
   factory ConnectionChecker({
     bool checkHostReachability = true,
-    List<InternetAddress>? checkAddresses,
+    List<ConnectionEntry>? checkAddresses,
+    List<ConnectionEntry>? checkApiUrls,
     Duration? checkOverDnsTimeout,
     String? baseUrlLookupAddress,
     Duration? requestInterval,
@@ -63,6 +75,7 @@ class ConnectionChecker {
   }) {
     return ConnectionChecker._(
       checkAddresses: checkAddresses,
+      checkApiUrls: checkApiUrls,
       checkOverDnsTimeout: checkOverDnsTimeout,
       baseUrlLookupAddress: baseUrlLookupAddress,
       checkHostReachability: checkHostReachability,
@@ -73,7 +86,8 @@ class ConnectionChecker {
 
   ConnectionChecker._({
     required bool checkHostReachability,
-    List<InternetAddress>? checkAddresses,
+    List<ConnectionEntry>? checkAddresses,
+    List<ConnectionEntry>? checkApiUrls,
     Duration? checkOverDnsTimeout,
     String? baseUrlLookupAddress,
     Duration? requestInterval,
@@ -83,14 +97,17 @@ class ConnectionChecker {
     Mapper<ConnectivityResult, ConnectionType>? connectionTypeMapper,
   })  : _checkHostReachability = checkHostReachability,
         _checkAddresses = checkAddresses,
+        _checkApiUrls = checkApiUrls,
         _checkOverDnsTimeout = checkOverDnsTimeout,
         _baseUrlLookupAddress = baseUrlLookupAddress,
         _failureAttempts = failureAttempts ?? _defaultFailureAttempts,
         _requestInterval = requestInterval ?? _defaultRequestInterval,
         _connectivity = connectivity ?? Connectivity(),
         _connectionTypeMapper = connectionTypeMapper ?? ConnectionTypeMapper(),
-        _hostReachabilityChecker =
-            hostReachabilityChecker ?? DefaultHostReachabilityChecker();
+        _hostReachabilityChecker = hostReachabilityChecker ??
+            (kIsWeb
+                ? WebHostReachabilityChecker()
+                : DefaultHostReachabilityChecker());
 
   /// Constructs a special [ConnectionChecker] instance, for the sake of
   /// unit testing.
@@ -100,7 +117,8 @@ class ConnectionChecker {
     required HostReachabilityChecker hostReachabilityChecker,
     required Mapper<ConnectivityResult, ConnectionType> connectionTypeMapper,
     bool checkHostReachability = true,
-    List<InternetAddress>? checkAddresses,
+    List<ConnectionEntry>? checkAddresses,
+    List<ConnectionEntry>? checkApiUrls,
     Duration? checkOverDnsTimeout,
     String? baseUrlLookupAddress,
     Duration? requestInterval,
@@ -112,6 +130,7 @@ class ConnectionChecker {
       connectionTypeMapper: connectionTypeMapper,
       connectivity: connectivity,
       checkAddresses: checkAddresses,
+      checkApiUrls: checkApiUrls,
       checkOverDnsTimeout: checkOverDnsTimeout,
       baseUrlLookupAddress: baseUrlLookupAddress,
       failureAttempts: failureAttempts,
@@ -122,7 +141,8 @@ class ConnectionChecker {
   final Connectivity _connectivity;
   final Mapper<ConnectivityResult, ConnectionType> _connectionTypeMapper;
 
-  final List<InternetAddress>? _checkAddresses;
+  final List<ConnectionEntry>? _checkAddresses;
+  final List<ConnectionEntry>? _checkApiUrls;
   final Duration? _checkOverDnsTimeout;
   final String? _baseUrlLookupAddress;
   final bool _checkHostReachability;
@@ -139,7 +159,7 @@ class ConnectionChecker {
   /// if online connection is actually online:
   /// - A new (or previous) connection type has to be online;
   /// - A socket connection has to be opened and successfully checked over DNS
-  /// port against at least one IP address (from `checkAddresses`);
+  /// port against at least one IP address (from `checkAddresses` or `checkApiUrls`);
   /// - A response from optional `baseUrlLookupAddress` has to be successful if
   /// address was provided.
   Stream<bool> get connectionStream => CombineLatestStream(
@@ -241,7 +261,7 @@ class ConnectionChecker {
   Future<bool> get _hostReachable async {
     final hostReachable = _checkHostReachability
         ? await _hostReachabilityChecker.canReachAnyHost(
-            internetAddresses: _checkAddresses,
+            internetAddresses: kIsWeb ? _checkApiUrls : _checkAddresses,
             timeout: _checkOverDnsTimeout,
           )
         : true;
