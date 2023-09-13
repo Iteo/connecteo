@@ -3,6 +3,9 @@ import 'dart:math';
 import 'package:connecteo/src/connection_entry.dart';
 import 'package:connecteo/src/connection_entry_type.dart';
 import 'package:connecteo/src/host_reachability_checker.dart';
+import 'package:connecteo/src/host_reachability_checker_stub.dart'
+  if (dart.library.html) 'package:connecteo/src/checkers/web_host_reachability_checker.dart'
+  if (dart.library.io) 'package:connecteo/src/checkers/native_host_reachability_checker.dart';
 import 'package:test/test.dart';
 
 final googleInternetAddress = ConnectionEntry(
@@ -21,7 +24,7 @@ void main() {
   late HostReachabilityChecker hostReachabilityChecker;
 
   setUpAll(() {
-    hostReachabilityChecker = DefaultHostReachabilityChecker();
+    hostReachabilityChecker = createChecker();
   });
 
   group('hostLookup', () {
