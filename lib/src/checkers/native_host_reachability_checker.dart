@@ -49,7 +49,7 @@ class NativeHostReachabilityChecker implements HostReachabilityChecker {
       ),
     );
 
-    return connectionResults.any((result) => result == true);
+    return connectionResults.any((success) => success);
   }
 
   Future<bool> _canReachHost({

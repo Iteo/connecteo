@@ -1,13 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:connecteo/src/checkers/web_host_reachability_checker.dart';
 import 'package:connecteo/src/connection_entry.dart';
 import 'package:connecteo/src/connection_type.dart';
 import 'package:connecteo/src/connection_type_mapper.dart';
 import 'package:connecteo/src/host_reachability_checker.dart';
-import 'package:connecteo/src/host_reachability_checker_stub.dart'
-  if (dart.library.html) './checkers/web_host_reachability_checker.dart'
-  if (dart.library.io) './checkers/native_host_reachability_checker.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
@@ -261,7 +259,8 @@ class ConnectionChecker {
   Future<bool> get _hostReachable async {
     final hostReachable = _checkHostReachability
         ? await _hostReachabilityChecker.canReachAnyHost(
-            internetAddresses: kIsWeb ? _checkApiUrls : _checkAddresses,
+            internetAddresses: _hostReachabilityChecker
+            is WebHostReachabilityChecker ? _checkApiUrls : _checkAddresses,
             timeout: _checkOverDnsTimeout,
           )
         : true;
