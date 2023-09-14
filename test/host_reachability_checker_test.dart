@@ -1,17 +1,18 @@
-import 'dart:io';
 import 'dart:math';
 
+import 'package:connecteo/src/connection_entry.dart';
+import 'package:connecteo/src/connection_entry_type.dart';
 import 'package:connecteo/src/host_reachability_checker.dart';
 import 'package:test/test.dart';
 
-final googleInternetAddress = InternetAddress(
+final googleInternetAddress = ConnectionEntry(
   '8.8.4.4',
-  type: InternetAddressType.IPv4,
+  ConnectionEntryType.ip,
 );
 
-final localhostAddress = InternetAddress(
+final localhostAddress = ConnectionEntry(
   '127.0.0.1',
-  type: InternetAddressType.IPv4,
+  ConnectionEntryType.ip,
 );
 
 const googleUrl = 'https://google.com/';

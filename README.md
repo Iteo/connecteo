@@ -60,9 +60,10 @@ The statement about reliable internet connection is true when all these conditio
 There are a couple of parameters (with its default values) that the `ConnectionChecker`'s constructor takes - you can modify them to suit your needs:
 
 - checkHostReachability - let's you specify if you want to open a socket connection to the list of addresses (`checkAddresses`). Its default value is set to `true`.
-- checkAddresses - a list of custom `InternetAddress` which will be used to open the socket connections. The default list contains from three addresses: *CloudFlare (1.1.1.1)*, *Google (8.8.4.4)* and *OpenDNS (208.67.222.222)*.
-- checkOverDnsTimeout - let's you specify the `Duration` which is being used for the timeout for each `InternetAddress` and its socket's opening. The default value is 3 seconds.
-- baseUrlLookupAddress - a `String` URL which indicates the address you want to lookup during connection checks. Once you provide your URL, the `connectionStream` and `isConnected` will return true values only after successful host lookup. Its default value is `null`.
+- checkAddresses - a list of custom `ConnectionEntry` which will be used to open the socket connections. The default list contains from three addresses: *CloudFlare (1.1.1.1)*, *Google (8.8.4.4)* and *OpenDNS (208.67.222.222)*. This list should be used only on native platforms.
+- checkApiUrls - a list of custom `ConnectionEntry` which will be used to check the response from api urls. The api need to return a response with http status 200. The default list contains from three addresses:  *https://one.one.one.one/*, *https://jsonplaceholder.typicode.com/posts/1* and *http://worldtimeapi.org/api/timezone*. This list should be used only on Web platforms.
+- checkOverDnsTimeout - let's you specify the `Duration` which is being used for the timeout for each `ConnectionEntry` and its socket's opening. The default value is 3 seconds.
+- baseUrlLookupAddress - a `String` URL which indicates the address you want to lookup during connection checks. Once you provide your URL, the `connectionStream` and `isConnected` will return true values only after successful host lookup. Its default value is `null`. On Web platform, need to be added api url.
 - requestInterval - it is a `Duration` which is being used for the interval how often the internet connection status should be refreshed. By default its value is set to 3 seconds.
 - failureAttempts - the number of maximum trials between changing the online to offline state.When the lost connection won't go back after number of `failureAttempts`, the `connectionStream` and `isConnected` will return false values until connection get back. The default value is set to 4 attempts.
 
@@ -72,13 +73,19 @@ Example:
 final connecteo = ConnectionChecker(
     checkHostReachability: true,
     checkAddresses: [
-        InternetAddress(
+        ConnectionEntry(
             '1.0.0.1', // CloudFlare
-            type: InternetAddressType.IPv4,
+            ConnectionEntryType.ip,
         ),
-        InternetAddress(
+      ConnectionEntry(
             '208.67.220.220', // OpenDNS
-            type: InternetAddressType.IPv4,
+            ConnectionEntryType.ip,
+        ),
+    ],
+    checkApiUrls: [
+        ConnectionEntry(
+            'https://one.one.one.one/', // CloudFlare
+            ConnectionEntryType.url,
         ),
     ],
     checkOverDnsTimeout: Duration(seconds: 5),
