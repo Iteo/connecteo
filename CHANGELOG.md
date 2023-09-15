@@ -1,3 +1,7 @@
+## 2.1.1
+
+- Update package version
+
 ## 2.1.0
 
 - Update Flutter version to 3.10.0
