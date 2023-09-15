@@ -1,3 +1,9 @@
+## 2.1.0
+
+- Update Flutter version to 3.10.0
+- Update Dart SDK constraints to `>=3.0.0 <4.0.0`
+- Update http package to 1.1.0
+
 ## 2.0.0
 
 - Add support for Web platform
