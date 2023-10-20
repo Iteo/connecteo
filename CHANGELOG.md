@@ -1,3 +1,6 @@
+## 2.1.2
+- Fix missing export `ConnectionEntry` class.
+
 ## 2.1.1
 
 - Update package version
