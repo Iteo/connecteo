@@ -1,4 +1,9 @@
+## 2.1.3
+
+- Update dependecies, including `connectivity_plus` according to `^5.0.2`
+
 ## 2.1.2
+
 - Fix missing export `ConnectionEntry` class.
 
 ## 2.1.1
