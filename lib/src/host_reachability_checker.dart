@@ -1,40 +1,33 @@
 import 'dart:io';
 
 import 'package:connecteo/src/connection_entry.dart';
-import 'package:connecteo/src/connection_entry_type.dart';
 import 'package:http/http.dart' as http;
 
 const _dnsPort = 53;
 
 const _defaultTimeout = Duration(seconds: 3);
 
-final _defaultAddresses = List<ConnectionEntry>.unmodifiable([
-  ConnectionEntry(
+final _defaultIpAddresses = List<ConnectionEntry>.unmodifiable([
+  ConnectionEntry.fromIpAddress(
     '1.1.1.1',
-    ConnectionEntryType.ip,
   ),
-  ConnectionEntry(
+  ConnectionEntry.fromIpAddress(
     '8.8.4.4',
-    ConnectionEntryType.ip,
   ),
-  ConnectionEntry(
+  ConnectionEntry.fromIpAddress(
     '208.67.222.222',
-    ConnectionEntryType.ip,
   ),
 ]);
 
 final _defaultUrls = List<ConnectionEntry>.unmodifiable([
-  ConnectionEntry(
+  ConnectionEntry.fromUrl(
     'https://one.one.one.one',
-    ConnectionEntryType.apiUrl,
   ),
-  ConnectionEntry(
+  ConnectionEntry.fromUrl(
     'https://jsonplaceholder.typicode.com/posts/1',
-    ConnectionEntryType.apiUrl,
   ),
-  ConnectionEntry(
+  ConnectionEntry.fromUrl(
     'http://worldtimeapi.org/api/timezone',
-    ConnectionEntryType.apiUrl,
   ),
 ]);
 
@@ -42,7 +35,7 @@ abstract class HostReachabilityChecker {
   Future<bool> hostLookup({required String baseUrl});
 
   Future<bool> canReachAnyHost({
-    List<ConnectionEntry>? internetAddresses,
+    List<ConnectionEntry>? connectionEntries,
     Duration? timeout,
   });
 }
@@ -62,14 +55,14 @@ class DefaultHostReachabilityChecker implements HostReachabilityChecker {
 
   @override
   Future<bool> canReachAnyHost({
-    List<ConnectionEntry>? internetAddresses,
+    List<ConnectionEntry>? connectionEntries,
     Duration? timeout,
   }) async {
-    final addresses = internetAddresses ?? _defaultAddresses;
+    final addresses = connectionEntries ?? _defaultIpAddresses;
     final connectionResults = await Future.wait(
       addresses.map(
-        (host) => _canReachHost(
-          address: host,
+        (host) => _canIoReachHost(
+          entry: host,
           timeout: timeout ?? _defaultTimeout,
         ),
       ),
@@ -78,14 +71,14 @@ class DefaultHostReachabilityChecker implements HostReachabilityChecker {
     return connectionResults.any((result) => result == true);
   }
 
-  Future<bool> _canReachHost({
-    required ConnectionEntry address,
+  Future<bool> _canIoReachHost({
+    required ConnectionEntry entry,
     required Duration timeout,
   }) async {
     try {
       final socket = await Socket.connect(
-        InternetAddress(address.host),
-        _dnsPort,
+        entry.host,
+        entry.port ?? _dnsPort,
         timeout: timeout,
       );
       socket.destroy();
@@ -102,8 +95,8 @@ class WebHostReachabilityChecker implements HostReachabilityChecker {
     try {
       final uri = Uri.parse(baseUrl);
       final result = await http.head(uri);
-      if (result.statusCode == 200) return true;
-      return false;
+
+      return (result.statusCode == HttpStatus.ok);
     } on SocketException catch (_) {
       return false;
     }
@@ -111,14 +104,14 @@ class WebHostReachabilityChecker implements HostReachabilityChecker {
 
   @override
   Future<bool> canReachAnyHost({
-    List<ConnectionEntry>? internetAddresses,
+    List<ConnectionEntry>? connectionEntries,
     Duration? timeout,
   }) async {
-    final addresses = internetAddresses ?? _defaultUrls;
+    final addresses = connectionEntries ?? _defaultUrls;
     final connectionResults = await Future.wait(
       addresses.map(
-        (host) => _canReachHost(
-          address: host,
+        (host) => _canWebReachHost(
+          entry: host,
           timeout: timeout ?? _defaultTimeout,
         ),
       ),
@@ -127,15 +120,15 @@ class WebHostReachabilityChecker implements HostReachabilityChecker {
     return connectionResults.any((result) => result == true);
   }
 
-  Future<bool> _canReachHost({
-    required ConnectionEntry address,
+  Future<bool> _canWebReachHost({
+    required ConnectionEntry entry,
     required Duration timeout,
   }) async {
     try {
-      final uri = Uri.parse(address.host);
+      final uri = Uri.parse(entry.host);
       final result = await http.get(uri);
-      if (result.statusCode == 200) return true;
-      return false;
+
+      return (result.statusCode == HttpStatus.ok);
     } catch (_) {
       return false;
     }
