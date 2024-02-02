@@ -11,10 +11,10 @@ void validateIpAddress(String ipAddress) {
   final expV6 = RegExp(_ipv6Regex);
   final isV6 = expV6.hasMatch(ipAddress);
 
-  if (!isV4 && !isV6) throw Exception('$ipAddress is not valid ip address');
+  if (!isV4 && !isV6) throw Exception('$ipAddress is not a valid ip address');
 }
 
-void validateApiUrl(String url) {
+void validateUrl(String url) {
   final expUrl = RegExp(_urlRegex);
-  if (!expUrl.hasMatch(url)) throw Exception('$url is not valid url');
+  if (!expUrl.hasMatch(url)) throw Exception('$url is not a valid url');
 }

@@ -45,14 +45,14 @@ void main() {
   group('Check ConnectionEntry for url', () {
     test('throws an exception when url is invalid', () {
       expect(
-        () => ConnectionEntry(invalidUrl, ConnectionEntryType.apiUrl),
+        () => ConnectionEntry(invalidUrl, ConnectionEntryType.url),
         throwsException,
       );
     });
 
     test('does not throw an error when url is valid', () {
       expect(
-        () => ConnectionEntry(validUrl, ConnectionEntryType.apiUrl),
+        () => ConnectionEntry(validUrl, ConnectionEntryType.url),
         returnsNormally,
       );
     });
