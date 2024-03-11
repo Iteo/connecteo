@@ -126,7 +126,10 @@ class WebHostReachabilityChecker implements HostReachabilityChecker {
   }) async {
     try {
       final uri = Uri.parse(entry.host);
-      final result = await http.get(uri);
+      final result = await http.get(
+        uri,
+        headers: {'accept': 'application/dns-json'},
+      );
 
       return (result.statusCode == HttpStatus.ok);
     } catch (_) {

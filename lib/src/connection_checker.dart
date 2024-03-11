@@ -71,25 +71,17 @@ class ConnectionChecker {
     String? baseUrlLookupAddress,
     Duration? requestInterval,
     int? failureAttempts,
-    @Deprecated('Use [checkConnectionEntriesNative] instead')
-    List<ConnectionEntry>? checkAddresses,
-    @Deprecated('Use [checkConnectionEntriesWeb] instead')
-    List<ConnectionEntry>? checkApiUrls,
-    @Deprecated('Use [hostReachabilityTimeout] instead')
-    Duration? checkOverDnsTimeout,
+    HostReachabilityChecker? hostReachabilityChecker,
   }) {
-    final reachabilityTimeout = hostReachabilityTimeout ?? checkOverDnsTimeout;
-    final nativeEntries = checkConnectionEntriesNative ?? checkAddresses;
-    final webEntries = checkConnectionEntriesWeb ?? checkApiUrls;
-
     return ConnectionChecker._(
-      checkConnectionEntriesNative: nativeEntries,
-      checkConnectionEntriesWeb: webEntries,
-      hostReachabilityTimeout: reachabilityTimeout,
+      checkConnectionEntriesNative: checkConnectionEntriesNative,
+      checkConnectionEntriesWeb: checkConnectionEntriesWeb,
+      hostReachabilityTimeout: hostReachabilityTimeout,
       baseUrlLookupAddress: baseUrlLookupAddress,
       checkHostReachability: checkHostReachability,
       failureAttempts: failureAttempts,
       requestInterval: requestInterval,
+      hostReachabilityChecker: hostReachabilityChecker,
     );
   }
 
