@@ -4,7 +4,6 @@ import 'dart:async';
 
 import 'package:connecteo/connecteo.dart';
 import 'package:connecteo/src/connection_type_mapper.dart';
-import 'package:connecteo/src/host_reachability_checker.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';

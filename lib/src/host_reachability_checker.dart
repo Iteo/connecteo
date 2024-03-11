@@ -68,7 +68,7 @@ class DefaultHostReachabilityChecker implements HostReachabilityChecker {
       ),
     );
 
-    return connectionResults.any((result) => result == true);
+    return connectionResults.any((result) => result);
   }
 
   Future<bool> _canIoReachHost({
@@ -117,7 +117,7 @@ class WebHostReachabilityChecker implements HostReachabilityChecker {
       ),
     );
 
-    return connectionResults.any((result) => result == true);
+    return connectionResults.any((result) => result);
   }
 
   Future<bool> _canWebReachHost({
@@ -126,7 +126,10 @@ class WebHostReachabilityChecker implements HostReachabilityChecker {
   }) async {
     try {
       final uri = Uri.parse(entry.host);
-      final result = await http.get(uri);
+      final result = await http.get(
+        uri,
+        headers: {'accept': 'application/dns-json'},
+      );
 
       return (result.statusCode == HttpStatus.ok);
     } catch (_) {
