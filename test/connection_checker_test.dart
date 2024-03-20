@@ -48,9 +48,7 @@ void main() {
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(false));
       when(
-        () => hostReachabilityChecker.hostLookup(
-          baseUrl: any(named: 'baseUrl'),
-        ),
+        () => hostReachabilityChecker.hostLookup(),
       ).thenAnswer((_) => Future.value(true));
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
@@ -61,8 +59,7 @@ void main() {
 
       expect(result, false);
       verify(() => hostReachabilityChecker.canReachAnyHost()).called(1);
-      verify(() => hostReachabilityChecker.hostLookup(baseUrl: baseUrl))
-          .called(1);
+      verify(() => hostReachabilityChecker.hostLookup()).called(1);
     });
 
     test(
@@ -71,9 +68,7 @@ void main() {
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(true));
       when(
-        () => hostReachabilityChecker.hostLookup(
-          baseUrl: any(named: 'baseUrl'),
-        ),
+        () => hostReachabilityChecker.hostLookup(),
       ).thenAnswer((_) => Future.value(true));
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
@@ -84,8 +79,7 @@ void main() {
 
       expect(result, true);
       verify(() => hostReachabilityChecker.canReachAnyHost()).called(1);
-      verify(() => hostReachabilityChecker.hostLookup(baseUrl: baseUrl))
-          .called(1);
+      verify(() => hostReachabilityChecker.hostLookup()).called(1);
     });
 
     test(
@@ -94,9 +88,7 @@ void main() {
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(true));
       when(
-        () => hostReachabilityChecker.hostLookup(
-          baseUrl: any(named: 'baseUrl'),
-        ),
+        () => hostReachabilityChecker.hostLookup(),
       ).thenAnswer((_) => Future.value(true));
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value([ConnectivityResult.none]));
@@ -107,8 +99,7 @@ void main() {
 
       expect(result, false);
       verify(() => hostReachabilityChecker.canReachAnyHost()).called(1);
-      verify(() => hostReachabilityChecker.hostLookup(baseUrl: baseUrl))
-          .called(1);
+      verify(() => hostReachabilityChecker.hostLookup()).called(1);
     });
   });
 
@@ -133,8 +124,7 @@ void main() {
       expect(result, true);
       verify(() => hostReachabilityChecker.canReachAnyHost()).called(1);
       verifyNever(
-        () =>
-            hostReachabilityChecker.hostLookup(baseUrl: any(named: 'baseUrl')),
+        () => hostReachabilityChecker.hostLookup(),
       );
     });
   });
@@ -163,9 +153,7 @@ void main() {
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(true));
       when(
-        () => hostReachabilityChecker.hostLookup(
-          baseUrl: any(named: 'baseUrl'),
-        ),
+        () => hostReachabilityChecker.hostLookup(),
       ).thenAnswer((_) => Future.value(true));
       when(() => connectivity.onConnectivityChanged)
           .thenAnswer((_) => controller.stream);
@@ -197,9 +185,7 @@ void main() {
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(true));
       when(
-        () => hostReachabilityChecker.hostLookup(
-          baseUrl: any(named: 'baseUrl'),
-        ),
+        () => hostReachabilityChecker.hostLookup(),
       ).thenAnswer((_) => Future.value(true));
       when(() => connectivity.onConnectivityChanged)
           .thenAnswer((_) => controller.stream);
@@ -214,8 +200,7 @@ void main() {
       ).then(
         (_) {
           verify(() => hostReachabilityChecker.canReachAnyHost()).called(1);
-          verify(() => hostReachabilityChecker.hostLookup(baseUrl: baseUrl))
-              .called(1);
+          verify(() => hostReachabilityChecker.hostLookup()).called(1);
         },
       );
       controller.add([ConnectivityResult.wifi]);
@@ -230,9 +215,7 @@ void main() {
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(true));
       when(
-        () => hostReachabilityChecker.hostLookup(
-          baseUrl: any(named: 'baseUrl'),
-        ),
+        () => hostReachabilityChecker.hostLookup(),
       ).thenAnswer((_) => Future.value(true));
       when(() => connectivity.onConnectivityChanged)
           .thenAnswer((_) => controller.stream);
@@ -249,8 +232,7 @@ void main() {
       ).then((_) {
         verify(() => hostReachabilityChecker.canReachAnyHost())
             .called(1 + failureAttempts);
-        verify(() => hostReachabilityChecker.hostLookup(baseUrl: baseUrl))
-            .called(1);
+        verify(() => hostReachabilityChecker.hostLookup()).called(1);
       });
       controller.add([ConnectivityResult.wifi]);
       await Future<void>.delayed(requestInterval);
@@ -266,9 +248,7 @@ void main() {
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(false));
       when(
-        () => hostReachabilityChecker.hostLookup(
-          baseUrl: any(named: 'baseUrl'),
-        ),
+        () => hostReachabilityChecker.hostLookup(),
       ).thenAnswer((_) => Future.value(false));
       when(() => connectivity.onConnectivityChanged)
           .thenAnswer((_) => controller.stream);
@@ -285,7 +265,7 @@ void main() {
           verify(() => hostReachabilityChecker.canReachAnyHost())
               .called(failureAttempts);
           verifyNever(
-            () => hostReachabilityChecker.hostLookup(baseUrl: baseUrl),
+            () => hostReachabilityChecker.hostLookup(),
           );
         },
       );
