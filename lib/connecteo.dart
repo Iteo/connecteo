@@ -6,3 +6,4 @@ export 'src/connection_checker.dart';
 export 'src/connection_entry.dart';
 export 'src/connection_entry_type.dart';
 export 'src/connection_type.dart';
+export 'src/host_reachability_checker.dart';
