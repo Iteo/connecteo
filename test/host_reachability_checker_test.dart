@@ -21,15 +21,12 @@ final googleUrl = ConnectionEntry.fromUrl(
 void main() {
   late HostReachabilityChecker hostReachabilityChecker;
 
-  setUpAll(() {
-    hostReachabilityChecker = DefaultHostReachabilityChecker();
-  });
-
   group('hostLookup', () {
     test('should return true if host of the provided address can be lookup',
         () async {
-      final result =
-          await hostReachabilityChecker.hostLookup(baseUrl: googleUrl.host);
+      hostReachabilityChecker =
+          DefaultHostReachabilityChecker(baseUrl: googleUrl.host);
+      final result = await hostReachabilityChecker.hostLookup();
 
       expect(result, true);
     });
@@ -43,8 +40,9 @@ void main() {
           List.generate(30, (index) => chars[Random().nextInt(chars.length)])
               .join();
       final baseUrl = 'https://$randomChars';
-
-      final result = await hostReachabilityChecker.hostLookup(baseUrl: baseUrl);
+      hostReachabilityChecker =
+          DefaultHostReachabilityChecker(baseUrl: baseUrl);
+      final result = await hostReachabilityChecker.hostLookup();
 
       expect(result, false);
     });
@@ -54,16 +52,19 @@ void main() {
     test('should return true if at least one host is reachable', () async {
       final addresses = [googleIpAddress, localhostIpAddress, googleUrl];
 
-      final result = await hostReachabilityChecker.canReachAnyHost(
-        connectionEntries: addresses,
-      );
+      hostReachabilityChecker =
+          DefaultHostReachabilityChecker(connectionEntries: addresses);
+      final result = await hostReachabilityChecker.canReachAnyHost();
 
       expect(result, true);
     });
 
     test('should return false if all hosts are not reachable', () async {
-      final result = await hostReachabilityChecker
-          .canReachAnyHost(connectionEntries: [localhostIpAddress]);
+      hostReachabilityChecker = DefaultHostReachabilityChecker(
+        connectionEntries: [localhostIpAddress],
+        checkHostReachability: false,
+      );
+      final result = await hostReachabilityChecker.canReachAnyHost();
 
       expect(result, false);
     });
@@ -73,9 +74,9 @@ void main() {
         () async {
       final addresses = [googleUrlWithPort];
 
-      final result = await hostReachabilityChecker.canReachAnyHost(
-        connectionEntries: addresses,
-      );
+      hostReachabilityChecker =
+          DefaultHostReachabilityChecker(connectionEntries: addresses);
+      final result = await hostReachabilityChecker.canReachAnyHost();
 
       expect(result, true);
     });
@@ -83,8 +84,9 @@ void main() {
     test(
         'should return false if socket connection (to all hosts) fails due to a wrong port on connection setup',
         () async {
-      final result = await hostReachabilityChecker
-          .canReachAnyHost(connectionEntries: [googleUrl]);
+      hostReachabilityChecker =
+          DefaultHostReachabilityChecker(connectionEntries: [googleUrl]);
+      final result = await hostReachabilityChecker.canReachAnyHost();
 
       expect(result, false);
     });
