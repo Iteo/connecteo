@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:connecteo/src/connection_entry.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 const _dnsPort = 53;
@@ -32,19 +33,65 @@ final _defaultUrls = List<ConnectionEntry>.unmodifiable([
 ]);
 
 abstract class HostReachabilityChecker {
-  Future<bool> hostLookup({required String baseUrl});
-
-  Future<bool> canReachAnyHost({
-    List<ConnectionEntry>? connectionEntries,
-    Duration? timeout,
+  HostReachabilityChecker({
+    required this.baseUrl,
+    required this.connectionEntries,
+    required this.timeout,
+    required this.checkHostReachability,
   });
+
+  factory HostReachabilityChecker.create({
+    required String? baseUrl,
+    required List<ConnectionEntry>? connectionEntries,
+    required Duration? timeout,
+    required bool? checkHostReachability,
+  }) =>
+      kIsWeb
+          ? WebHostReachabilityChecker(
+              baseUrl: baseUrl,
+              connectionEntries: connectionEntries,
+              timeout: timeout,
+              checkHostReachability: checkHostReachability,
+            )
+          : DefaultHostReachabilityChecker(
+              baseUrl: baseUrl,
+              connectionEntries: connectionEntries,
+              timeout: timeout,
+              checkHostReachability: checkHostReachability,
+            );
+
+  final String? baseUrl;
+  final List<ConnectionEntry>? connectionEntries;
+  final Duration? timeout;
+  final bool? checkHostReachability;
+
+  Future<bool> hostLookup();
+
+  Future<bool> canReachAnyHost();
+
+  Future<bool> check() async {
+    final hostReachable =
+        checkHostReachability ?? false ? await canReachAnyHost() : true;
+
+    final baseUrlReachable =
+        baseUrl != null && baseUrl!.isNotEmpty ? await hostLookup() : true;
+
+    return hostReachable && baseUrlReachable;
+  }
 }
 
-class DefaultHostReachabilityChecker implements HostReachabilityChecker {
+class DefaultHostReachabilityChecker extends HostReachabilityChecker {
+  DefaultHostReachabilityChecker({
+    super.baseUrl,
+    super.connectionEntries,
+    super.timeout,
+    super.checkHostReachability,
+  });
+
   @override
-  Future<bool> hostLookup({required String baseUrl}) async {
+  Future<bool> hostLookup() async {
     try {
-      final host = Uri.parse(baseUrl).host;
+      final host = Uri.parse(baseUrl!).host;
       await InternetAddress.lookup(host);
 
       return true;
@@ -89,11 +136,18 @@ class DefaultHostReachabilityChecker implements HostReachabilityChecker {
   }
 }
 
-class WebHostReachabilityChecker implements HostReachabilityChecker {
+class WebHostReachabilityChecker extends HostReachabilityChecker {
+  WebHostReachabilityChecker({
+    super.baseUrl,
+    super.connectionEntries,
+    super.timeout,
+    super.checkHostReachability,
+  });
+
   @override
-  Future<bool> hostLookup({required String baseUrl}) async {
+  Future<bool> hostLookup() async {
     try {
-      final uri = Uri.parse(baseUrl);
+      final uri = Uri.parse(baseUrl!);
       final result = await http.head(uri);
 
       return (result.statusCode == HttpStatus.ok);

@@ -97,18 +97,20 @@ class ConnectionChecker {
     HostReachabilityChecker? hostReachabilityChecker,
     Mapper<ConnectivityResult, ConnectionType>? connectionTypeMapper,
   })  : _checkHostReachability = checkHostReachability,
-        _hostReachabilityTimeout = hostReachabilityTimeout,
         _baseUrlLookupAddress = baseUrlLookupAddress,
         _failureAttempts = failureAttempts ?? _defaultFailureAttempts,
         _requestInterval = requestInterval ?? _defaultRequestInterval,
         _connectivity = connectivity ?? Connectivity(),
         _connectionTypeMapper = connectionTypeMapper ?? ConnectionTypeMapper(),
-        _checkConnectionEntries =
-            (kIsWeb ? checkConnectionEntriesWeb : checkConnectionEntriesNative),
         _hostReachabilityChecker = hostReachabilityChecker ??
-            (kIsWeb
-                ? WebHostReachabilityChecker()
-                : DefaultHostReachabilityChecker());
+            HostReachabilityChecker.create(
+              baseUrl: baseUrlLookupAddress,
+              checkHostReachability: checkHostReachability,
+              connectionEntries: kIsWeb
+                  ? checkConnectionEntriesWeb
+                  : checkConnectionEntriesNative,
+              timeout: hostReachabilityTimeout,
+            );
 
   /// Constructs a special [ConnectionChecker] instance, for the sake of
   /// unit testing.
@@ -142,8 +144,6 @@ class ConnectionChecker {
   final Connectivity _connectivity;
   final Mapper<ConnectivityResult, ConnectionType> _connectionTypeMapper;
 
-  final List<ConnectionEntry>? _checkConnectionEntries;
-  final Duration? _hostReachabilityTimeout;
   final String? _baseUrlLookupAddress;
   final bool _checkHostReachability;
   final Duration _requestInterval;
@@ -199,7 +199,7 @@ class ConnectionChecker {
     final isConnectionTypeOnline =
         _connectionTypeMapper.call(result).onlineType;
 
-    final reachability = await Future.wait([_hostReachable, _baseUrlReachable]);
+    final reachability = await Future.wait([_hostReachabilityChecker.check()]);
     final isHostReachable = [isConnectionTypeOnline, ...reachability]
         .every((reachable) => reachable);
 
@@ -263,21 +263,14 @@ class ConnectionChecker {
   }
 
   Future<bool> get _hostReachable async {
-    final hostReachable = _checkHostReachability
-        ? await _hostReachabilityChecker.canReachAnyHost(
-            connectionEntries: _checkConnectionEntries,
-            timeout: _hostReachabilityTimeout,
-          )
+    return _checkHostReachability
+        ? await _hostReachabilityChecker.canReachAnyHost()
         : true;
-    return hostReachable;
   }
 
   Future<bool> get _baseUrlReachable async {
     if (_baseUrlLookupAddress != null && _baseUrlLookupAddress!.isNotEmpty) {
-      final result = await _hostReachabilityChecker.hostLookup(
-        baseUrl: _baseUrlLookupAddress!,
-      );
-      return result;
+      return await _hostReachabilityChecker.hostLookup();
     } else {
       return true;
     }
