@@ -177,11 +177,8 @@ class ConnectionChecker {
   Stream<bool> get connectionStream => CombineLatestStream(
         [
           ConcatStream([
-            _connectivity
-                .checkConnectivity()
-                .asStream()
-                .map(_connectionTypeMapper.call),
-            _connectivity.onConnectivityChanged.map(_connectionTypeMapper.call),
+            _connectivity.checkConnectivity().asStream().map(_connectionType),
+            _connectivity.onConnectivityChanged.map(_connectionType),
           ]),
           Stream<void>.periodic(_requestInterval),
         ],
@@ -204,14 +201,20 @@ class ConnectionChecker {
   /// it is more secure to listen for [connectionStream].
   Future<bool> get isConnected async {
     final result = await _connectivity.checkConnectivity();
-    final isConnectionTypeOnline =
-        _connectionTypeMapper.call(result).onlineType;
+    final isConnectionTypeOnline = _connectionType(result).onlineType;
 
     final reachability = await Future.wait([_hostReachable, _baseUrlReachable]);
     final isHostReachable = [isConnectionTypeOnline, ...reachability]
-        .every((reachable) => reachable == true);
+        .every((reachable) => reachable);
 
     return isHostReachable;
+  }
+
+  ConnectionType _connectionType(List<ConnectivityResult> results) {
+    for (final data in results) {
+      return _connectionTypeMapper.call(data);
+    }
+    return ConnectionType.none;
   }
 
   /// Returns the current [ConnectionType] of your device.
@@ -224,7 +227,7 @@ class ConnectionChecker {
   /// cellular data connection for example.
   Future<ConnectionType> get connectionType async {
     final connectivityResult = await _connectivity.checkConnectivity();
-    return _connectionTypeMapper.call(connectivityResult);
+    return _connectionType(connectivityResult);
   }
 
   /// Resolves as soon as internet connection status get back from offline state.
