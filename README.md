@@ -47,11 +47,12 @@ final hasInternetConnection = await connecteo.isConnected;
 
 ## How it works
 
-The statement about reliable internet connection is true when all these conditions are met:
+The statement about a reliable internet connection is true when all these conditions are met:
 
-- A new (or previous) connection type is the online one - it is a kind of self explanatory. The connection type can not be `.none`. Every other type is classified as the online.
-- A socket connection has to be opened and successfully checked over DNS port (53) against at least one IP address - `ConnectionChecker` defines a default list of IP addresses which are globally available DNS resolvers. During connection check (and right after checking the above connection type), all addresses are pinged. When at least one socket connection will succeed with its IP address, the information about successful connection is being returned, signalizing the data connection. On the other hand, when all the socket connection trials will fail, then the `ConnectionChecker` informs about lack of internet connection.
-- (optional) a response from the provided Base Url address has to be successful - if host address for the Base Url was provided in `ConnectionChecker` constructor, the host lookup is being made against the Base Url. If the lookup process will finish successfully without any `SocketException` then the condition is being met. This check was dictated by cases where an internet connection got back from an offline state but the requests to the Base Url were failing for the first few seconds. It was causing some confusions because in majority of cases, we expect successful requests once connection gets back to online.
+- A new (or previous) connection type is the online one - it is kind of self-explanatory. The connection type cannot be `.none`. Every other type is classified as online.
+- (On native platforms) A socket connection has to be opened and successfully established against at least one address - `ConnectionChecker` defines a default list of IP addresses that are globally available DNS resolvers. When at least one socket connection succeeds with its address, the information about the successful connection is returned, signaling the data connection. On the other hand, when all the socket connection trials fail, the `ConnectionChecker` informs about a lack of internet connection.
+- (on the Web platform) - situation here is similar to the native platform, but instead of the socket connection, the http call is being made. If we receive a response with 200 status code from one URL at least, the information about a successful connection is returned.
+- (optional) a response from the provided Base Url address has to be successful - if host address for the Base Url was provided in `ConnectionChecker` constructor, the host lookup is being made against the Base Url. If the lookup process will finish successfully without any `SocketException` then the condition is being met. This check was dictated by cases where an internet connection got back from an offline state, but the requests to the Base Url were failing for the first few seconds. It was causing some confusion because, in the majority of cases, we expect successful requests once the connection gets back online.
 
 ## Usage
 
@@ -59,36 +60,34 @@ The statement about reliable internet connection is true when all these conditio
 
 There are a couple of parameters (with its default values) that the `ConnectionChecker`'s constructor takes - you can modify them to suit your needs:
 
-- checkHostReachability - let's you specify if you want to open a socket connection to the list of addresses (`checkAddresses`). Its default value is set to `true`.
-- checkAddresses - a list of custom `ConnectionEntry` which will be used to open the socket connections. The default list contains from three addresses: *CloudFlare (1.1.1.1)*, *Google (8.8.4.4)* and *OpenDNS (208.67.222.222)*. This list should be used only on native platforms.
-- checkApiUrls - a list of custom `ConnectionEntry` which will be used to check the response from api urls. The api need to return a response with http status 200. The default list contains from three addresses:  *https://one.one.one.one/*, *https://jsonplaceholder.typicode.com/posts/1* and *http://worldtimeapi.org/api/timezone*. This list should be used only on Web platforms.
-- checkOverDnsTimeout - let's you specify the `Duration` which is being used for the timeout for each `ConnectionEntry` and its socket's opening. The default value is 3 seconds.
-- baseUrlLookupAddress - a `String` URL which indicates the address you want to lookup during connection checks. Once you provide your URL, the `connectionStream` and `isConnected` will return true values only after successful host lookup. Its default value is `null`. On Web platform, need to be added api url.
-- requestInterval - it is a `Duration` which is being used for the interval how often the internet connection status should be refreshed. By default its value is set to 3 seconds.
-- failureAttempts - the number of maximum trials between changing the online to offline state.When the lost connection won't go back after number of `failureAttempts`, the `connectionStream` and `isConnected` will return false values until connection get back. The default value is set to 4 attempts.
+- checkHostReachability - let's you specify if you want to open the socket connections on native platforms (or make an http call on a web platform) against the list of addresses. Its default value is set to `true`.
+- checkConnectionEntriesNative - a list of custom `ConnectionEntry` which will be used to open the socket connections. The default list contains three ip addresses: *CloudFlare (1.1.1.1)*, *Google (8.8.4.4)* and *OpenDNS (208.67.222.222)*. This argument should be used only on native platforms.
+- checkConnectionEntriesWeb - a list of custom `ConnectionEntry` which will be used to check the responses from urls. At least one of the provided urls here has to return a response with an http status 200. The default list contains the following addresses: *https://one.one.one.one/*, *https://jsonplaceholder.typicode.com/posts/1* and *http://worldtimeapi.org/api/timezone*. This argument should be used only on Web platforms.
+- hostReachabilityTimeout - let's you specify the `Duration` which is being used for the timeout for each `ConnectionEntry` and its socket's opening. The default value is 3 seconds.
+- baseUrlLookupAddress - a `String` URL which indicates the address you want to lookup during connection checks. Once you provide your URL, the `connectionStream` and `isConnected` will return true values only after a successful host lookup. Its default value is `null`.
+- requestInterval - it is a `Duration` which is being used for the interval how often the internet connection status should be refreshed. By default, its value is set to 3 seconds.
+- failureAttempts - the number of maximum trials between changing the online to offline state.When the lost connection won't go back after number of `failureAttempts`, the `connectionStream` and `isConnected` will return false values until the connection gets back. The default value is set to 4 attempts.
 
 Example:
 
 ```dart
 final connecteo = ConnectionChecker(
     checkHostReachability: true,
-    checkAddresses: [
-        ConnectionEntry(
+    checkConnectionEntriesNative: [
+        ConnectionEntry.fromIpAddress(
             '1.0.0.1', // CloudFlare
-            ConnectionEntryType.ip,
         ),
-      ConnectionEntry(
+        ConnectionEntry(
             '208.67.220.220', // OpenDNS
             ConnectionEntryType.ip,
         ),
     ],
-    checkApiUrls: [
-        ConnectionEntry(
+    checkConnectionEntriesWeb: [
+        ConnectionEntry.fromUrl(
             'https://one.one.one.one/', // CloudFlare
-            ConnectionEntryType.url,
         ),
     ],
-    checkOverDnsTimeout: Duration(seconds: 5),
+    hostReachabilityTimeout: Duration(seconds: 5),
     baseUrlLookupAddress: 'https://pub.dev/',
     failureAttempts: 7,
     requestInterval: Duration(seconds: 5),

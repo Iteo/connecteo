@@ -1,4 +1,15 @@
+## 2.2.0
+
+- Removed InternetAddress constraint on IO platforms (when creating a socket connection check)
+- Changed some `ConnectionChecker` param names: `checkConnectionEntriesNative` intead of `checkAddresses`, `checkConnectionEntriesWeb` instead of `checkApiUrls` and `hostReachabilityTimeout` instead of `checkOverDnsTimeout`
+- `ConnectionEntry` class can take a port number, which may be used intead of default DNS port on the native platforms
+
+## 2.1.3
+
+- Update dependecies, including `connectivity_plus` according to `^5.0.2`
+
 ## 2.1.2
+
 - Fix missing export `ConnectionEntry` class.
 
 ## 2.1.1

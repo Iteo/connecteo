@@ -1,5 +1,7 @@
-/// A representation of connection entry type, which can be either `ip` or `apiUrl`.
+/// A type of connection entry
 enum ConnectionEntryType {
   ip,
+  url,
+  @Deprecated('Use [ConnectionEntryType.url] instead')
   apiUrl,
 }

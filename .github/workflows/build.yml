@@ -2,7 +2,9 @@ name: Build
 
 on:
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
+      - 'rc/*'
 
 jobs:
   build:
@@ -12,9 +14,9 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install environment
-        uses: subosito/flutter-action@v2.8.0
+        uses: subosito/flutter-action@v2.12.0
         with:
-          flutter-version: 3.10.0
+          flutter-version: 3.10.6
 
       - name: Get dependencies
         run: flutter pub get
