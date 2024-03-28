@@ -54,7 +54,7 @@ void main() {
         ),
       ).thenAnswer((_) => Future.value(true));
       when(() => connectivity.checkConnectivity())
-          .thenAnswer((_) => Future.value(ConnectivityResult.wifi));
+          .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
       when(() => connectionTypeMapper.call(any()))
           .thenAnswer((_) => ConnectionType.wifi);
 
@@ -77,7 +77,7 @@ void main() {
         ),
       ).thenAnswer((_) => Future.value(true));
       when(() => connectivity.checkConnectivity())
-          .thenAnswer((_) => Future.value(ConnectivityResult.wifi));
+          .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
       when(() => connectionTypeMapper.call(any()))
           .thenAnswer((_) => ConnectionType.wifi);
 
@@ -100,7 +100,7 @@ void main() {
         ),
       ).thenAnswer((_) => Future.value(true));
       when(() => connectivity.checkConnectivity())
-          .thenAnswer((_) => Future.value(ConnectivityResult.none));
+          .thenAnswer((_) => Future.value([ConnectivityResult.none]));
       when(() => connectionTypeMapper.call(any()))
           .thenAnswer((_) => ConnectionType.none);
 
@@ -125,7 +125,7 @@ void main() {
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(true));
       when(() => connectivity.checkConnectivity())
-          .thenAnswer((_) => Future.value(ConnectivityResult.wifi));
+          .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
       when(() => connectionTypeMapper.call(any()))
           .thenAnswer((_) => ConnectionType.wifi);
 
@@ -145,7 +145,7 @@ void main() {
       const expected = ConnectionType.wifi;
 
       when(() => connectivity.checkConnectivity())
-          .thenAnswer((_) => Future.value(ConnectivityResult.wifi));
+          .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
       when(() => connectionTypeMapper.call(any())).thenAnswer((_) => expected);
 
       final result = await connectionChecker.connectionType;
@@ -160,7 +160,7 @@ void main() {
   group('untilConnects', () {
     test('returns the Future once, after the connection is renewed', () async {
       final completer = Completer<bool>();
-      final controller = StreamController<ConnectivityResult>();
+      final controller = StreamController<List<ConnectivityResult>>();
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(true));
       when(
@@ -175,14 +175,14 @@ void main() {
       when(() => connectionTypeMapper.call(ConnectivityResult.none))
           .thenAnswer((_) => ConnectionType.none);
       when(() => connectivity.checkConnectivity())
-          .thenAnswer((_) => Future.value(ConnectivityResult.wifi));
+          .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
 
       connectionChecker.untilConnects().whenComplete(() {
         completer.complete(true);
       });
-      controller.add(ConnectivityResult.none);
+      controller.add([ConnectivityResult.none]);
       await Future<void>.delayed(requestInterval);
-      controller.add(ConnectivityResult.wifi);
+      controller.add([ConnectivityResult.wifi]);
 
       expect(completer.future, completion(true));
 
@@ -194,7 +194,7 @@ void main() {
     test(
         'returns [true] from Stream while hosts are reachable, base url is reachable and connection type is online',
         () async {
-      final controller = StreamController<ConnectivityResult>();
+      final controller = StreamController<List<ConnectivityResult>>();
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(true));
       when(
@@ -207,7 +207,7 @@ void main() {
       when(() => connectionTypeMapper.call(any()))
           .thenAnswer((_) => ConnectionType.wifi);
       when(() => connectivity.checkConnectivity())
-          .thenAnswer((_) => Future.value(ConnectivityResult.wifi));
+          .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
 
       expectLater(
         connectionChecker.connectionStream,
@@ -219,7 +219,7 @@ void main() {
               .called(1);
         },
       );
-      controller.add(ConnectivityResult.wifi);
+      controller.add([ConnectivityResult.wifi]);
 
       controller.close();
     });
@@ -227,7 +227,7 @@ void main() {
     test(
         'returns [true, false] from Stream while hosts are reachable, base url is reachable but connection dropped',
         () async {
-      final controller = StreamController<ConnectivityResult>();
+      final controller = StreamController<List<ConnectivityResult>>();
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(true));
       when(
@@ -242,7 +242,7 @@ void main() {
       when(() => connectionTypeMapper.call(ConnectivityResult.none))
           .thenAnswer((_) => ConnectionType.none);
       when(() => connectivity.checkConnectivity())
-          .thenAnswer((_) => Future.value(ConnectivityResult.wifi));
+          .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
 
       expectLater(
         connectionChecker.connectionStream,
@@ -253,9 +253,9 @@ void main() {
         verify(() => hostReachabilityChecker.hostLookup(baseUrl: baseUrl))
             .called(1);
       });
-      controller.add(ConnectivityResult.wifi);
+      controller.add([ConnectivityResult.wifi]);
       await Future<void>.delayed(requestInterval);
-      controller.add(ConnectivityResult.none);
+      controller.add([ConnectivityResult.none]);
 
       controller.close();
     });
@@ -263,7 +263,7 @@ void main() {
     test(
         'returns [false] from Stream while hosts are not reachable although connection type is online',
         () async {
-      final controller = StreamController<ConnectivityResult>.broadcast();
+      final controller = StreamController<List<ConnectivityResult>>.broadcast();
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(false));
       when(
@@ -276,7 +276,7 @@ void main() {
       when(() => connectionTypeMapper.call(ConnectivityResult.wifi))
           .thenAnswer((_) => ConnectionType.wifi);
       when(() => connectivity.checkConnectivity())
-          .thenAnswer((_) => Future.value(ConnectivityResult.wifi));
+          .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
 
       expectLater(
         connectionChecker.connectionStream,
@@ -290,7 +290,7 @@ void main() {
           );
         },
       );
-      controller.add(ConnectivityResult.wifi);
+      controller.add([ConnectivityResult.wifi]);
 
       controller.close();
     });
