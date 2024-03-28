@@ -1,3 +1,7 @@
+## 2.2.1
+- Support new connectivity plus multiple connection type
+- Fix crash on iphone.
+
 ## 2.2.0
 
 - Removed InternetAddress constraint on IO platforms (when creating a socket connection check)

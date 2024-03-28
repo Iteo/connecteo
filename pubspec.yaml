@@ -1,6 +1,6 @@
 name: connecteo
 description: A plugin that wraps connectivity_plus and adds some additional data connection checks.
-version: 2.2.0
+version: 2.2.1
 repository: https://github.com/Iteo/connecteo
 issue_tracker: https://github.com/Iteo/connecteo/issues
 homepage: https://github.com/Iteo/connecteo

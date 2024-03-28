@@ -68,7 +68,7 @@ class DefaultHostReachabilityChecker implements HostReachabilityChecker {
       ),
     );
 
-    return connectionResults.any((result) => result == true);
+    return connectionResults.any((result) => result);
   }
 
   Future<bool> _canIoReachHost({
@@ -117,7 +117,7 @@ class WebHostReachabilityChecker implements HostReachabilityChecker {
       ),
     );
 
-    return connectionResults.any((result) => result == true);
+    return connectionResults.any((result) => result);
   }
 
   Future<bool> _canWebReachHost({
