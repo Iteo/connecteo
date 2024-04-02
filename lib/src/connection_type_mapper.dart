@@ -6,10 +6,14 @@ abstract class Mapper<I, O> {
 }
 
 class ConnectionTypeMapper
-    implements Mapper<ConnectivityResult, ConnectionType> {
+    implements Mapper<List<ConnectivityResult>, List<ConnectionType>> {
   @override
-  ConnectionType call(ConnectivityResult input) {
-    switch (input) {
+  List<ConnectionType> call(List<ConnectivityResult> input) {
+    return input.map(_map).toList();
+  }
+
+  ConnectionType _map(ConnectivityResult connectivityResult) {
+    switch (connectivityResult) {
       case ConnectivityResult.bluetooth:
         return ConnectionType.bluetooth;
       case ConnectivityResult.ethernet:
@@ -26,4 +30,8 @@ class ConnectionTypeMapper
         return ConnectionType.none;
     }
   }
+}
+
+extension ListConnectionTypeExt on List<ConnectionType> {
+  bool get isOnline => isNotEmpty && every((value) => value.onlineType);
 }

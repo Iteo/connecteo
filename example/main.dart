@@ -34,7 +34,7 @@ class _ConnecteoExamplePageState extends State<ConnecteoExamplePage> {
   late StreamSubscription<bool> _streamSubscription;
 
   Color? _backgroundColor;
-  ConnectionType? _connectionType;
+  List<ConnectionType>? _connectionTypes;
 
   @override
   void initState() {
@@ -67,14 +67,14 @@ class _ConnecteoExamplePageState extends State<ConnecteoExamplePage> {
                 children: [
                   OutlinedButton(
                     onPressed: () async {
-                      final type = await _connecteo.connectionType;
+                      final types = await _connecteo.connectionTypes;
                       setState(() {
-                        _connectionType = type;
+                        _connectionTypes = types;
                       });
                     },
                     child: const Text('Check connection type'),
                   ),
-                  Text('Connection type value: $_connectionType'),
+                  Text('Connection type value: $_connectionTypes'),
                 ],
               ),
             )
