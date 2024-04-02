@@ -11,7 +11,7 @@ A plugin that wraps [connectivity_plus](https://pub.dev/packages/connectivity_pl
     - [ConnectionChecker init](#connectionchecker-init)
     - [connectionStream](#get-connectionstream)
     - [isConnected](#get-isconnected)
-    - [connectionType](#get-connectiontype)
+    - [connectionTypes](#get-connectiontypes)
     - [untilConnects](#untilconnects)
 
 ## Motivation
@@ -127,7 +127,7 @@ if (hasInternetConnection) {
 }
 ```
 
-### get connectionType
+### get connectionTypes
 
 Returns the current connection type.
 
@@ -136,8 +136,8 @@ Example:
 ```dart
 final connecteo = ConnectionChecker();
 
-final type = await connecteo.connectionType;
-if (type == ConnectionType.mobile) {
+final types = await connecteo.connectionTypes;
+if (types.contains(ConnectionType.mobile)) {
     // Handle the logic when the application uses cellular data
 }
 ```

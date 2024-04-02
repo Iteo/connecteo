@@ -103,7 +103,8 @@ class ConnectionChecker {
     int? failureAttempts,
     Connectivity? connectivity,
     HostReachabilityChecker? hostReachabilityChecker,
-    Mapper<ConnectivityResult, ConnectionType>? connectionTypeMapper,
+    Mapper<List<ConnectivityResult>, List<ConnectionType>>?
+        connectionTypeMapper,
   })  : _checkHostReachability = checkHostReachability,
         _hostReachabilityTimeout = hostReachabilityTimeout,
         _baseUrlLookupAddress = baseUrlLookupAddress,
@@ -124,7 +125,8 @@ class ConnectionChecker {
   factory ConnectionChecker.test({
     required Connectivity connectivity,
     required HostReachabilityChecker hostReachabilityChecker,
-    required Mapper<ConnectivityResult, ConnectionType> connectionTypeMapper,
+    required Mapper<List<ConnectivityResult>, List<ConnectionType>>
+        connectionTypeMapper,
     bool checkHostReachability = true,
     List<ConnectionEntry>? checkConnectionEntriesNative,
     List<ConnectionEntry>? checkConnectionEntriesWeb,
@@ -148,7 +150,8 @@ class ConnectionChecker {
   }
 
   final Connectivity _connectivity;
-  final Mapper<ConnectivityResult, ConnectionType> _connectionTypeMapper;
+  final Mapper<List<ConnectivityResult>, List<ConnectionType>>
+      _connectionTypeMapper;
 
   final List<ConnectionEntry>? _checkConnectionEntries;
   final Duration? _hostReachabilityTimeout;
@@ -177,13 +180,16 @@ class ConnectionChecker {
   Stream<bool> get connectionStream => CombineLatestStream(
         [
           ConcatStream([
-            _connectivity.checkConnectivity().asStream().map(_connectionType),
-            _connectivity.onConnectivityChanged.map(_connectionType),
+            _connectivity
+                .checkConnectivity()
+                .asStream()
+                .map(_connectionTypeMapper.call),
+            _connectivity.onConnectivityChanged.map(_connectionTypeMapper.call),
           ]),
           Stream<void>.periodic(_requestInterval),
         ],
         // ignore: cast_nullable_to_non_nullable
-        (events) => events.first as ConnectionType,
+        (events) => events.first as List<ConnectionType>,
       )
           .flatMap(_isConnectionTypeReachableStream)
           .scan<int>(_accumulateFailures, 0)
@@ -201,20 +207,13 @@ class ConnectionChecker {
   /// it is more secure to listen for [connectionStream].
   Future<bool> get isConnected async {
     final result = await _connectivity.checkConnectivity();
-    final isConnectionTypeOnline = _connectionType(result).onlineType;
+    final isConnectionTypeOnline = _connectionTypeMapper.call(result).isOnline;
 
     final reachability = await Future.wait([_hostReachable, _baseUrlReachable]);
     final isHostReachable = [isConnectionTypeOnline, ...reachability]
         .every((reachable) => reachable);
 
     return isHostReachable;
-  }
-
-  ConnectionType _connectionType(List<ConnectivityResult> results) {
-    for (final data in results) {
-      return _connectionTypeMapper.call(data);
-    }
-    return ConnectionType.none;
   }
 
   /// Returns the current [ConnectionType] of your device.
@@ -225,9 +224,9 @@ class ConnectionChecker {
   /// [ConnectionType.vpn] does not guarantee you have got internet connection.
   /// However, it may be helpful when you want to implement specific logic for
   /// cellular data connection for example.
-  Future<ConnectionType> get connectionType async {
+  Future<List<ConnectionType>> get connectionTypes async {
     final connectivityResult = await _connectivity.checkConnectivity();
-    return _connectionType(connectivityResult);
+    return _connectionTypeMapper.call(connectivityResult);
   }
 
   /// Resolves as soon as internet connection status get back from offline state.
@@ -236,13 +235,13 @@ class ConnectionChecker {
   }
 
   Stream<bool> _isConnectionTypeReachableStream(
-    ConnectionType connectionType,
+    List<ConnectionType> connectionTypeList,
   ) async* {
     final isHostReachable = await _hostReachable;
     if (!isHostReachable) {
       yield false;
     } else {
-      if (connectionType.onlineType) {
+      if (connectionTypeList.isOnline) {
         yield true;
       } else {
         yield false;
