@@ -56,7 +56,7 @@ void main() {
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
       when(() => connectionTypeMapper.call(any()))
-          .thenAnswer((_) => ConnectionType.wifi);
+          .thenAnswer((_) => [ConnectionType.wifi]);
 
       final result = await connectionChecker.isConnected;
 
@@ -79,7 +79,7 @@ void main() {
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
       when(() => connectionTypeMapper.call(any()))
-          .thenAnswer((_) => ConnectionType.wifi);
+          .thenAnswer((_) => [ConnectionType.wifi]);
 
       final result = await connectionChecker.isConnected;
 
@@ -102,7 +102,7 @@ void main() {
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value([ConnectivityResult.none]));
       when(() => connectionTypeMapper.call(any()))
-          .thenAnswer((_) => ConnectionType.none);
+          .thenAnswer((_) => [ConnectionType.none]);
 
       final result = await connectionChecker.isConnected;
 
@@ -127,7 +127,7 @@ void main() {
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
       when(() => connectionTypeMapper.call(any()))
-          .thenAnswer((_) => ConnectionType.wifi);
+          .thenAnswer((_) => [ConnectionType.wifi]);
 
       final result = await connectionChecker.isConnected;
 
@@ -140,19 +140,19 @@ void main() {
     });
   });
 
-  group('connectionType', () {
-    test('returns current connectionType', () async {
-      const expected = ConnectionType.wifi;
+  group('connectionTypes', () {
+    test('returns current connectionTypes', () async {
+      const expected = [ConnectionType.wifi];
 
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
       when(() => connectionTypeMapper.call(any())).thenAnswer((_) => expected);
 
-      final result = await connectionChecker.connectionType;
+      final result = await connectionChecker.connectionTypes;
 
       expect(result, expected);
       verify(() => connectivity.checkConnectivity()).called(1);
-      verify(() => connectionTypeMapper.call(ConnectivityResult.wifi))
+      verify(() => connectionTypeMapper.call([ConnectivityResult.wifi]))
           .called(1);
     });
   });
@@ -170,10 +170,10 @@ void main() {
       ).thenAnswer((_) => Future.value(true));
       when(() => connectivity.onConnectivityChanged)
           .thenAnswer((_) => controller.stream);
-      when(() => connectionTypeMapper.call(ConnectivityResult.wifi))
-          .thenAnswer((_) => ConnectionType.wifi);
-      when(() => connectionTypeMapper.call(ConnectivityResult.none))
-          .thenAnswer((_) => ConnectionType.none);
+      when(() => connectionTypeMapper.call([ConnectivityResult.wifi]))
+          .thenAnswer((_) => [ConnectionType.wifi]);
+      when(() => connectionTypeMapper.call([ConnectivityResult.none]))
+          .thenAnswer((_) => [ConnectionType.none]);
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
 
@@ -205,7 +205,7 @@ void main() {
       when(() => connectivity.onConnectivityChanged)
           .thenAnswer((_) => controller.stream);
       when(() => connectionTypeMapper.call(any()))
-          .thenAnswer((_) => ConnectionType.wifi);
+          .thenAnswer((_) => [ConnectionType.wifi]);
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
 
@@ -237,10 +237,10 @@ void main() {
       ).thenAnswer((_) => Future.value(true));
       when(() => connectivity.onConnectivityChanged)
           .thenAnswer((_) => controller.stream);
-      when(() => connectionTypeMapper.call(ConnectivityResult.wifi))
-          .thenAnswer((_) => ConnectionType.wifi);
-      when(() => connectionTypeMapper.call(ConnectivityResult.none))
-          .thenAnswer((_) => ConnectionType.none);
+      when(() => connectionTypeMapper.call([ConnectivityResult.wifi]))
+          .thenAnswer((_) => [ConnectionType.wifi]);
+      when(() => connectionTypeMapper.call([ConnectivityResult.none]))
+          .thenAnswer((_) => [ConnectionType.none]);
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
 
@@ -273,8 +273,8 @@ void main() {
       ).thenAnswer((_) => Future.value(false));
       when(() => connectivity.onConnectivityChanged)
           .thenAnswer((_) => controller.stream);
-      when(() => connectionTypeMapper.call(ConnectivityResult.wifi))
-          .thenAnswer((_) => ConnectionType.wifi);
+      when(() => connectionTypeMapper.call([ConnectivityResult.wifi]))
+          .thenAnswer((_) => [ConnectionType.wifi]);
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
 
