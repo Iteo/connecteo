@@ -33,5 +33,5 @@ class ConnectionTypeMapper
 }
 
 extension ListConnectionTypeExt on List<ConnectionType> {
-  bool get isOnline => isNotEmpty && every((value) => value.onlineType);
+  bool get containsOnline => isNotEmpty && any((value) => value.onlineType);
 }
