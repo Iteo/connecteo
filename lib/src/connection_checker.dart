@@ -207,7 +207,8 @@ class ConnectionChecker {
   /// it is more secure to listen for [connectionStream].
   Future<bool> get isConnected async {
     final result = await _connectivity.checkConnectivity();
-    final isConnectionTypesContainsOnline = _connectionTypeMapper.call(result).containsOnline;
+    final isConnectionTypesContainsOnline =
+        _connectionTypeMapper.call(result).containsOnline;
 
     final reachability = await Future.wait([_hostReachable, _baseUrlReachable]);
     final isHostReachable = [isConnectionTypesContainsOnline, ...reachability]

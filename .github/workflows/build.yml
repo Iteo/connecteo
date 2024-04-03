@@ -16,7 +16,7 @@ jobs:
       - name: Install environment
         uses: subosito/flutter-action@v2.12.0
         with:
-          flutter-version: 3.16.0
+          flutter-version: 3.16.9
 
       - name: Get dependencies
         run: flutter pub get
