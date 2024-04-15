@@ -35,49 +35,38 @@ final _defaultUrls = List<ConnectionEntry>.unmodifiable([
 abstract class HostReachabilityChecker {
   HostReachabilityChecker({
     required this.baseUrl,
-    required this.connectionEntries,
-    required this.timeout,
-    required this.checkHostReachability,
+    this.connectionEntries,
+    this.timeout,
   });
 
   factory HostReachabilityChecker.create({
     required String? baseUrl,
     required List<ConnectionEntry>? connectionEntries,
     required Duration? timeout,
-    required bool? checkHostReachability,
   }) =>
       kIsWeb
           ? WebHostReachabilityChecker(
               baseUrl: baseUrl,
               connectionEntries: connectionEntries,
               timeout: timeout,
-              checkHostReachability: checkHostReachability,
             )
           : DefaultHostReachabilityChecker(
               baseUrl: baseUrl,
               connectionEntries: connectionEntries,
               timeout: timeout,
-              checkHostReachability: checkHostReachability,
             );
 
   final String? baseUrl;
   final List<ConnectionEntry>? connectionEntries;
   final Duration? timeout;
-  final bool? checkHostReachability;
+
+  bool get hasBaseUrl => _baseUrl.isNotEmpty;
+
+  String get _baseUrl => baseUrl ?? '';
 
   Future<bool> hostLookup();
 
   Future<bool> canReachAnyHost();
-
-  Future<bool> check() async {
-    final hostReachable =
-        checkHostReachability ?? false ? await canReachAnyHost() : true;
-
-    final baseUrlReachable =
-        baseUrl != null && baseUrl!.isNotEmpty ? await hostLookup() : true;
-
-    return hostReachable && baseUrlReachable;
-  }
 }
 
 class DefaultHostReachabilityChecker extends HostReachabilityChecker {
@@ -85,13 +74,14 @@ class DefaultHostReachabilityChecker extends HostReachabilityChecker {
     super.baseUrl,
     super.connectionEntries,
     super.timeout,
-    super.checkHostReachability,
   });
 
   @override
   Future<bool> hostLookup() async {
+    if (!hasBaseUrl) return false;
+
     try {
-      final host = Uri.parse(baseUrl!).host;
+      final host = Uri.parse(_baseUrl).host;
       await InternetAddress.lookup(host);
 
       return true;
@@ -101,10 +91,7 @@ class DefaultHostReachabilityChecker extends HostReachabilityChecker {
   }
 
   @override
-  Future<bool> canReachAnyHost({
-    List<ConnectionEntry>? connectionEntries,
-    Duration? timeout,
-  }) async {
+  Future<bool> canReachAnyHost() async {
     final addresses = connectionEntries ?? _defaultIpAddresses;
     final connectionResults = await Future.wait(
       addresses.map(
@@ -141,13 +128,14 @@ class WebHostReachabilityChecker extends HostReachabilityChecker {
     super.baseUrl,
     super.connectionEntries,
     super.timeout,
-    super.checkHostReachability,
   });
 
   @override
   Future<bool> hostLookup() async {
+    if (!hasBaseUrl) return false;
+
     try {
-      final uri = Uri.parse(baseUrl!);
+      final uri = Uri.parse(_baseUrl);
       final result = await http.head(uri);
 
       return (result.statusCode == HttpStatus.ok);
@@ -157,10 +145,7 @@ class WebHostReachabilityChecker extends HostReachabilityChecker {
   }
 
   @override
-  Future<bool> canReachAnyHost({
-    List<ConnectionEntry>? connectionEntries,
-    Duration? timeout,
-  }) async {
+  Future<bool> canReachAnyHost() async {
     final addresses = connectionEntries ?? _defaultUrls;
     final connectionResults = await Future.wait(
       addresses.map(
