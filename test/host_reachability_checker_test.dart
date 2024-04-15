@@ -62,7 +62,6 @@ void main() {
     test('should return false if all hosts are not reachable', () async {
       hostReachabilityChecker = DefaultHostReachabilityChecker(
         connectionEntries: [localhostIpAddress],
-        checkHostReachability: false,
       );
       final result = await hostReachabilityChecker.canReachAnyHost();
 

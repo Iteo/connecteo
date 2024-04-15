@@ -71,7 +71,6 @@ class ConnectionChecker {
     String? baseUrlLookupAddress,
     Duration? requestInterval,
     int? failureAttempts,
-    HostReachabilityChecker? hostReachabilityChecker,
   }) {
     return ConnectionChecker._(
       checkConnectionEntriesNative: checkConnectionEntriesNative,
@@ -79,6 +78,34 @@ class ConnectionChecker {
       hostReachabilityTimeout: hostReachabilityTimeout,
       baseUrlLookupAddress: baseUrlLookupAddress,
       checkHostReachability: checkHostReachability,
+      failureAttempts: failureAttempts,
+      requestInterval: requestInterval,
+    );
+  }
+
+  /// Factory method an instance of the [ConnectionChecker] class.
+  ///
+  /// - `hostReachabilityChecker` - [HostReachabilityChecker] is custom
+  /// implementation of network checking methods, which is used by
+  /// [ConnectionChecker].
+  ///
+  /// - `reguestInterval` - a [Duration] that is being used for the interval
+  /// how often the internet connection status should be refreshed. By default
+  /// its value is set to 3 seconds.
+  ///
+  /// - `failureAttempts` - the number of maximum trials between changing the
+  /// online to offline state. If the internet connection is lost, the
+  /// [ConnectionChecker] will try to reconnect by every [requestInterval].
+  /// When the lost connection won't go back after a number of [failureAttempts],
+  /// the [connectionStream] and [isConnected] will return false values until
+  /// connection get back. The default value is set to 4 attempts.
+  factory ConnectionChecker.fromReachabilityChecker({
+    required HostReachabilityChecker? hostReachabilityChecker,
+    Duration? requestInterval,
+    int? failureAttempts,
+  }) {
+    return ConnectionChecker._(
+      checkHostReachability: true,
       failureAttempts: failureAttempts,
       requestInterval: requestInterval,
       hostReachabilityChecker: hostReachabilityChecker,
@@ -98,7 +125,6 @@ class ConnectionChecker {
     Mapper<List<ConnectivityResult>, List<ConnectionType>>?
         connectionTypeMapper,
   })  : _checkHostReachability = checkHostReachability,
-        _baseUrlLookupAddress = baseUrlLookupAddress,
         _failureAttempts = failureAttempts ?? _defaultFailureAttempts,
         _requestInterval = requestInterval ?? _defaultRequestInterval,
         _connectivity = connectivity ?? Connectivity(),
@@ -106,7 +132,6 @@ class ConnectionChecker {
         _hostReachabilityChecker = hostReachabilityChecker ??
             HostReachabilityChecker.create(
               baseUrl: baseUrlLookupAddress,
-              checkHostReachability: checkHostReachability,
               connectionEntries: kIsWeb
                   ? checkConnectionEntriesWeb
                   : checkConnectionEntriesNative,
@@ -147,7 +172,6 @@ class ConnectionChecker {
   final Mapper<List<ConnectivityResult>, List<ConnectionType>>
       _connectionTypeMapper;
 
-  final String? _baseUrlLookupAddress;
   final bool _checkHostReachability;
   final Duration _requestInterval;
   final int _failureAttempts;
@@ -272,10 +296,8 @@ class ConnectionChecker {
   }
 
   Future<bool> get _baseUrlReachable async {
-    if (_baseUrlLookupAddress != null && _baseUrlLookupAddress!.isNotEmpty) {
-      return await _hostReachabilityChecker.hostLookup();
-    } else {
-      return true;
-    }
+    return _hostReachabilityChecker.hasBaseUrl
+        ? await _hostReachabilityChecker.hostLookup()
+        : true;
   }
 }
