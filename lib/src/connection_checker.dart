@@ -233,7 +233,7 @@ class ConnectionChecker {
     return isHostReachable;
   }
 
-  /// Returns the current [ConnectionType] of your device.
+  /// Returns the current [List<ConnectionType>] of your device.
   ///
   /// Do not use it for determination of your current connection status - this
   /// getter only provides the information about current connection type,
