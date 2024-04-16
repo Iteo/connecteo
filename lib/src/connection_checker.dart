@@ -100,7 +100,7 @@ class ConnectionChecker {
   /// the [connectionStream] and [isConnected] will return false values until
   /// connection get back. The default value is set to 4 attempts.
   factory ConnectionChecker.fromReachabilityChecker({
-    required HostReachabilityChecker? hostReachabilityChecker,
+    required HostReachabilityChecker hostReachabilityChecker,
     Duration? requestInterval,
     int? failureAttempts,
   }) {

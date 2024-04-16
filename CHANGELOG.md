@@ -1,4 +1,10 @@
+## 2.3.0
+
+- Added possibility to adding custom implementation of network checker.
+- Added DNS Over HTTPS for WebHostReachalilityChecker
+
 ## 2.2.1
+
 - Support new connectivity plus multiple connection type
 - Fix crash on iphone.
 
