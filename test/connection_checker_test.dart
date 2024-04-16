@@ -146,9 +146,9 @@ void main() {
       when(() => hostReachabilityChecker.hostLookup())
           .thenAnswer((_) => Future.value(true));
       when(() => connectivity.checkConnectivity())
-          .thenAnswer((_) => Future.value(ConnectivityResult.wifi));
+          .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
       when(() => connectionTypeMapper.call(any()))
-          .thenAnswer((_) => ConnectionType.wifi);
+          .thenAnswer((_) => [ConnectionType.wifi]);
 
       final result = await connectionChecker.isConnected;
 
