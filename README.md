@@ -94,6 +94,63 @@ final connecteo = ConnectionChecker(
 );
 ```
 
+### Own network checker implementation
+
+There is a factory named constructor `fromReachabilityChecker` in `ConnectionChecker` to put own implementation of network checker. First of all you need to create class which `extends HostReachabilityChecker` and implements 2 methods `hostLookup` and `canReachAnyHost`, they are responsible for network checking.
+
+- hostReachabilityChecker - it is a custom implementation of network checker.
+- requestInterval - it is a `Duration` which is being used for the interval how often the internet connection status should be refreshed. By default, its value is set to 3 seconds.
+- failureAttempts - the number of maximum trials between changing the online to offline state.When the lost connection won't go back after number of `failureAttempts`, the `connectionStream` and `isConnected` will return false values until the connection gets back. The default value is set to 4 attempts.
+
+> **Note** 
+> If you don't want use one of those `canReachAnyHost` or `hostLookup` methods, just return true`.
+
+Example:
+
+```dart
+
+class CustomReachabilityChecker extends HostReachabilityChecker {
+  CustomReachabilityChecker({
+    required super.baseUrl,
+    required super.connectionEntries,
+    super.timeout,
+  });
+  
+  @override
+  Future<bool> canReachAnyHost() {
+    // TODO implement checking connection for connectionEntries
+  }
+
+  @override
+  Future<bool> hostLookup() {
+    // TODO implement checking connection for baseUrl
+  }
+}
+
+final customReachabilityChecker = CustomReachabilityChecker(
+  baseUrl: 'url here',
+  connectionEntries: [
+    ConnectionEntry(
+      'url',
+    ),
+    ConnectionEntry(
+      'url',
+      ConnectionEntryType.url,
+    ),
+    ConnectionEntry(
+      'ip',
+      ConnectionEntryType.ip,
+    ),
+  ],
+);
+
+final connecteo =  ConnectionChecker.fromReachabilityChecker(
+  hostReachabilityChecker: customReachabilityChecker,
+  failureAttempts: 7,
+  requestInterval: Duration(seconds: 5),
+);
+```
+
 ### get connectionStream
 
 Returns the reliable internet connection status with the help of `Stream<bool>`. It yields its value every time when connection type will change or desired interval (`ConnectionChecker`'s constructor argument) will pass.

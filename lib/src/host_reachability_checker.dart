@@ -35,8 +35,8 @@ final _defaultUrls = List<ConnectionEntry>.unmodifiable([
 abstract class HostReachabilityChecker {
   HostReachabilityChecker({
     required this.baseUrl,
-    this.connectionEntries,
-    this.timeout,
+    required this.connectionEntries,
+    required this.timeout,
   });
 
   factory HostReachabilityChecker.create({
