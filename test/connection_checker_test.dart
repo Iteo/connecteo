@@ -50,7 +50,7 @@ void main() {
       when(
         () => hostReachabilityChecker.hostLookup(),
       ).thenAnswer((_) => Future.value(true));
-      when(() => hostReachabilityChecker.hasBaseUrl).thenReturn(true);
+
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
       when(() => connectionTypeMapper.call(any()))
@@ -71,7 +71,7 @@ void main() {
       when(
         () => hostReachabilityChecker.hostLookup(),
       ).thenAnswer((_) => Future.value(true));
-      when(() => hostReachabilityChecker.hasBaseUrl).thenReturn(true);
+
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
       when(() => connectionTypeMapper.call(any()))
@@ -92,7 +92,7 @@ void main() {
       when(
         () => hostReachabilityChecker.hostLookup(),
       ).thenAnswer((_) => Future.value(true));
-      when(() => hostReachabilityChecker.hasBaseUrl).thenReturn(true);
+
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) => Future.value([ConnectivityResult.none]));
       when(() => connectionTypeMapper.call(any()))
@@ -108,31 +108,6 @@ void main() {
 
   group('isConnected', () {
     test(
-        'returns true if connection type is online, hosts are reachable but baseUrl is not provided',
-        () async {
-      connectionChecker = ConnectionChecker.test(
-        connectivity: connectivity,
-        hostReachabilityChecker: hostReachabilityChecker,
-        connectionTypeMapper: connectionTypeMapper,
-      );
-      when(() => hostReachabilityChecker.canReachAnyHost())
-          .thenAnswer((_) => Future.value(true));
-      when(() => hostReachabilityChecker.hasBaseUrl).thenReturn(false);
-      when(() => connectivity.checkConnectivity())
-          .thenAnswer((_) => Future.value([ConnectivityResult.wifi]));
-      when(() => connectionTypeMapper.call(any()))
-          .thenAnswer((_) => [ConnectionType.wifi]);
-
-      final result = await connectionChecker.isConnected;
-
-      expect(result, true);
-      verify(() => hostReachabilityChecker.canReachAnyHost()).called(1);
-      verifyNever(
-        () => hostReachabilityChecker.hostLookup(),
-      );
-    });
-
-    test(
         'returns true if connection type is online, hosts are reachable and baseUrl is provided',
         () async {
       connectionChecker = ConnectionChecker.test(
@@ -142,7 +117,6 @@ void main() {
       );
       when(() => hostReachabilityChecker.canReachAnyHost())
           .thenAnswer((_) => Future.value(true));
-      when(() => hostReachabilityChecker.hasBaseUrl).thenReturn(true);
       when(() => hostReachabilityChecker.hostLookup())
           .thenAnswer((_) => Future.value(true));
       when(() => connectivity.checkConnectivity())
@@ -184,7 +158,7 @@ void main() {
       when(
         () => hostReachabilityChecker.hostLookup(),
       ).thenAnswer((_) => Future.value(true));
-      when(() => hostReachabilityChecker.hasBaseUrl).thenReturn(true);
+
       when(() => connectivity.onConnectivityChanged)
           .thenAnswer((_) => controller.stream);
       when(() => connectionTypeMapper.call([ConnectivityResult.wifi]))
@@ -217,7 +191,7 @@ void main() {
       when(
         () => hostReachabilityChecker.hostLookup(),
       ).thenAnswer((_) => Future.value(true));
-      when(() => hostReachabilityChecker.hasBaseUrl).thenReturn(true);
+
       when(() => connectivity.onConnectivityChanged)
           .thenAnswer((_) => controller.stream);
       when(() => connectionTypeMapper.call(any()))
@@ -248,7 +222,7 @@ void main() {
       when(
         () => hostReachabilityChecker.hostLookup(),
       ).thenAnswer((_) => Future.value(true));
-      when(() => hostReachabilityChecker.hasBaseUrl).thenReturn(true);
+
       when(() => connectivity.onConnectivityChanged)
           .thenAnswer((_) => controller.stream);
       when(() => connectionTypeMapper.call([ConnectivityResult.wifi]))
