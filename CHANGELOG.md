@@ -1,7 +1,8 @@
-## 2.3.0
+## 3.0.0
 
 - Added possibility to adding custom implementation of network checker.
 - Added DNS Over HTTPS for WebHostReachalilityChecker
+- Removed deprecated fields.
 
 ## 2.2.1
 
