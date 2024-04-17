@@ -33,52 +33,46 @@ final _defaultUrls = List<ConnectionEntry>.unmodifiable([
 ]);
 
 abstract class HostReachabilityChecker {
-  HostReachabilityChecker({
-    required this.baseUrl,
-    required this.connectionEntries,
-    required this.timeout,
-  });
-
-  factory HostReachabilityChecker.create({
-    required String? baseUrl,
-    required List<ConnectionEntry>? connectionEntries,
-    required Duration? timeout,
-  }) =>
-      kIsWeb
-          ? WebHostReachabilityChecker(
-              baseUrl: baseUrl,
-              connectionEntries: connectionEntries,
-              timeout: timeout,
-            )
-          : DefaultHostReachabilityChecker(
-              baseUrl: baseUrl,
-              connectionEntries: connectionEntries,
-              timeout: timeout,
-            );
-
-  final String? baseUrl;
-  final List<ConnectionEntry>? connectionEntries;
-  final Duration? timeout;
-
-  bool get hasBaseUrl => _baseUrl.isNotEmpty;
-
-  String get _baseUrl => baseUrl ?? '';
-
   Future<bool> hostLookup();
 
   Future<bool> canReachAnyHost();
 }
 
+HostReachabilityChecker getPlatformHostReachabilityChecker({
+  String? baseUrl,
+  List<ConnectionEntry>? connectionEntries,
+  Duration? timeout,
+}) {
+  if (kIsWeb) {
+    return WebHostReachabilityChecker(
+      baseUrl: baseUrl,
+      connectionEntries: connectionEntries,
+    );
+  } else {
+    return DefaultHostReachabilityChecker(
+      baseUrl: baseUrl,
+      connectionEntries: connectionEntries,
+      timeout: timeout,
+    );
+  }
+}
+
 class DefaultHostReachabilityChecker extends HostReachabilityChecker {
   DefaultHostReachabilityChecker({
-    super.baseUrl,
-    super.connectionEntries,
-    super.timeout,
-  });
+    String? baseUrl,
+    List<ConnectionEntry>? connectionEntries,
+    Duration? timeout,
+  })  : _baseUrl = baseUrl ?? '',
+        _connectionEntries = connectionEntries ?? _defaultIpAddresses,
+        _timeout = timeout ?? _defaultTimeout;
+
+  final String _baseUrl;
+  final List<ConnectionEntry> _connectionEntries;
+  final Duration _timeout;
 
   @override
   Future<bool> hostLookup() async {
-    if (!hasBaseUrl) return false;
+    if (_baseUrl.isEmpty) return false;
 
     try {
       final host = Uri.parse(_baseUrl).host;
@@ -92,12 +86,11 @@ class DefaultHostReachabilityChecker extends HostReachabilityChecker {
 
   @override
   Future<bool> canReachAnyHost() async {
-    final addresses = connectionEntries ?? _defaultIpAddresses;
     final connectionResults = await Future.wait(
-      addresses.map(
+      _connectionEntries.map(
         (host) => _canIoReachHost(
           entry: host,
-          timeout: timeout ?? _defaultTimeout,
+          timeout: _timeout,
         ),
       ),
     );
@@ -125,14 +118,17 @@ class DefaultHostReachabilityChecker extends HostReachabilityChecker {
 
 class WebHostReachabilityChecker extends HostReachabilityChecker {
   WebHostReachabilityChecker({
-    super.baseUrl,
-    super.connectionEntries,
-    super.timeout,
-  });
+    String? baseUrl,
+    List<ConnectionEntry>? connectionEntries,
+  })  : _baseUrl = baseUrl ?? '',
+        _connectionEntries = connectionEntries ?? _defaultUrls;
+
+  final String _baseUrl;
+  final List<ConnectionEntry> _connectionEntries;
 
   @override
   Future<bool> hostLookup() async {
-    if (!hasBaseUrl) return false;
+    if (_baseUrl.isEmpty) return false;
 
     try {
       final uri = Uri.parse(_baseUrl);
@@ -146,12 +142,10 @@ class WebHostReachabilityChecker extends HostReachabilityChecker {
 
   @override
   Future<bool> canReachAnyHost() async {
-    final addresses = connectionEntries ?? _defaultUrls;
     final connectionResults = await Future.wait(
-      addresses.map(
+      _connectionEntries.map(
         (host) => _canWebReachHost(
           entry: host,
-          timeout: timeout ?? _defaultTimeout,
         ),
       ),
     );
@@ -161,7 +155,6 @@ class WebHostReachabilityChecker extends HostReachabilityChecker {
 
   Future<bool> _canWebReachHost({
     required ConnectionEntry entry,
-    required Duration timeout,
   }) async {
     try {
       final uri = Uri.parse(entry.host);

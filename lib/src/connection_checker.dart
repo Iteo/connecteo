@@ -125,12 +125,14 @@ class ConnectionChecker {
     Mapper<List<ConnectivityResult>, List<ConnectionType>>?
         connectionTypeMapper,
   })  : _checkHostReachability = checkHostReachability,
+        _checkBaseUrlReachability =
+            baseUrlLookupAddress != null || hostReachabilityChecker != null,
         _failureAttempts = failureAttempts ?? _defaultFailureAttempts,
         _requestInterval = requestInterval ?? _defaultRequestInterval,
         _connectivity = connectivity ?? Connectivity(),
         _connectionTypeMapper = connectionTypeMapper ?? ConnectionTypeMapper(),
         _hostReachabilityChecker = hostReachabilityChecker ??
-            HostReachabilityChecker.create(
+            getPlatformHostReachabilityChecker(
               baseUrl: baseUrlLookupAddress,
               connectionEntries: kIsWeb
                   ? checkConnectionEntriesWeb
@@ -173,6 +175,7 @@ class ConnectionChecker {
       _connectionTypeMapper;
 
   final bool _checkHostReachability;
+  final bool _checkBaseUrlReachability;
   final Duration _requestInterval;
   final int _failureAttempts;
 
@@ -296,7 +299,7 @@ class ConnectionChecker {
   }
 
   Future<bool> get _baseUrlReachable async {
-    return _hostReachabilityChecker.hasBaseUrl
+    return _checkBaseUrlReachability
         ? await _hostReachabilityChecker.hostLookup()
         : true;
   }
