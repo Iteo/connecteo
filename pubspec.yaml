@@ -1,14 +1,14 @@
 name: connecteo
 description: A plugin that wraps connectivity_plus and adds some additional data connection checks.
-version: 2.3.0
+version: 3.0.0
 repository: https://github.com/Iteo/connecteo
 issue_tracker: https://github.com/Iteo/connecteo/issues
 homepage: https://github.com/Iteo/connecteo
 documentation: https://github.com/Iteo/connecteo/blob/master/README.md
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
-  flutter: ">=3.10.0"
+  sdk: ">=3.2.0 <4.0.0"
+  flutter: ">=3.16.0"
 
 dependencies:
   connectivity_plus: ^6.0.1
