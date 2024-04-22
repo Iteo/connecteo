@@ -175,15 +175,7 @@ Example:
 ```dart
 
 class CustomReachabilityChecker extends HostReachabilityChecker {
-  @override
-  Future<bool> canReachAnyHost() {
-    // TODO implement host connection
-  }
-
-  @override
-  Future<bool> hostLookup() {
-    // TODO implement host lookup
-  }
+// TODO implementation 
 }
 
 final connecteo =  ConnectionChecker.fromReachabilityChecker(

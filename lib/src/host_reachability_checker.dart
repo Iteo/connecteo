@@ -32,9 +32,32 @@ final _defaultUrls = List<ConnectionEntry>.unmodifiable([
   ),
 ]);
 
+/// A class for custom implementation how the desired hosts are reached.
+///
+/// This abstract class provides a contract used by ConnectionChecker class.
+/// The contract assumes own implementation of methods to perform
+/// host lookup of desired url along with the reachabiltiy of provided hosts.
+///
+/// Example usage:
+/// ```dart
+/// class CustomReachabilityChecker extends HostReachabilityChecker { [...] }
+///
+/// final connecteo =  ConnectionChecker.fromReachabilityChecker(
+///   hostReachabilityChecker: CustomReachabilityChecker(), [...]
+/// );
+/// ```
 abstract class HostReachabilityChecker {
+  /// Performs a host lookup to determine if the host is reachable.
+  ///
+  /// Returns a [Future] that completes with a boolean value indicating whether
+  /// the host is reachable or not.
   Future<bool> hostLookup();
 
+  /// Check if desired hosts are reachable (e.g. via opening a socket
+  /// connection to each address)
+  ///
+  /// Returns a [Future] that completes with a boolean value indicating whether
+  /// host can be reached or not.
   Future<bool> canReachAnyHost();
 }
 
