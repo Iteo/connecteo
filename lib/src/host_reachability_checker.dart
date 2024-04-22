@@ -47,17 +47,17 @@ final _defaultUrls = List<ConnectionEntry>.unmodifiable([
 /// );
 /// ```
 abstract class HostReachabilityChecker {
-  /// Performs a host lookup to determine if the host is reachable.
+  /// Should perform a host lookup.
   ///
-  /// Returns a [Future] that completes with a boolean value indicating whether
-  /// the host is reachable or not.
+  /// Returns a [Future] that completes with a boolean value which should indicate
+  /// if the desired host lookup was successful.
   Future<bool> hostLookup();
 
-  /// Check if desired hosts are reachable (e.g. via opening a socket
+  /// Should check if desired hosts are reachable (e.g. via opening a socket
   /// connection to each address)
   ///
-  /// Returns a [Future] that completes with a boolean value indicating whether
-  /// host can be reached or not.
+  /// Returns a [Future] that completes with a boolean value which should indicate
+  /// if any of the desired hosts are reachable.
   Future<bool> canReachAnyHost();
 }
 
